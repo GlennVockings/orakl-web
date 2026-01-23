@@ -1,0 +1,16 @@
+{
+  "name": "fake-betting",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "dev:web": "pnpm --filter web dev",
+    "dev:api": "pnpm --filter api start:dev",
+    "dev:stack": "docker compose up -d",
+    "db:studio": "pnpm --filter api prisma studio"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

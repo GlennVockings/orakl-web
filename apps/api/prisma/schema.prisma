@@ -1,0 +1,158 @@
+// ---------- Prisma config ----------
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ---------- Enums ----------
+enum Role {
+  ADMIN
+  PLAYER
+}
+
+enum EventStatus {
+  DRAFT
+  OPEN
+  SUSPENDED
+  CLOSED
+  SETTLED
+}
+
+enum MarketStatus {
+  OPEN
+  SUSPENDED
+  CLOSED
+  SETTLED
+}
+
+enum SelectionStatus {
+  ACTIVE
+  WINNER
+  LOSER
+  VOID
+}
+
+enum BetStatus {
+  PENDING
+  WON
+  LOST
+  VOID
+}
+
+enum WalletType {
+  CREDIT
+  DEBIT
+  PAYOUT
+  REFUND
+}
+
+enum EventRole {
+  HOST
+  ADMIN
+  PARTICIPANT
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  displayName  String
+  role         Role     @default(PLAYER)
+  createdAt    DateTime @default(now())
+  passwordHash String?
+
+  // relations
+  memberships    EventMember[]
+  eventsCreated  Event[]          @relation("EventsCreatedBy")
+  bets           Bet[]
+  EventWalletTxn EventWalletTxn[]
+}
+
+model EventMember {
+  id       String    @id @default(cuid())
+  eventId  String
+  userId   String
+  role     EventRole @default(PARTICIPANT)
+  joinedAt DateTime  @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
+  @@index([userId])
+}
+
+model Event {
+  id       String      @id @default(cuid())
+  name     String
+  startsAt DateTime
+  status   EventStatus @default(DRAFT)
+
+  createdById String?
+  createdBy   User?   @relation("EventsCreatedBy", fields: [createdById], references: [id])
+
+  isPublic  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  members    EventMember[]
+  markets    Market[]
+  walletTxns EventWalletTxn[]
+}
+
+model Market {
+  id         String       @id @default(cuid())
+  eventId    String
+  event      Event        @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  name       String
+  status     MarketStatus @default(OPEN)
+  selections Selection[]
+  createdAt  DateTime     @default(now())
+
+  @@unique([eventId, name]) // optional but handy
+}
+
+model Selection {
+  id          String          @id @default(cuid())
+  marketId    String
+  market      Market          @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  label       String
+  decimalOdds Decimal         @db.Decimal(10, 3)
+  status      SelectionStatus @default(ACTIVE)
+  bets        Bet[]
+}
+
+model Bet {
+  id              String    @id @default(cuid())
+  eventId         String
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  selectionId     String
+  selection       Selection @relation(fields: [selectionId], references: [id], onDelete: Cascade)
+  stake           Decimal   @db.Decimal(12, 2)
+  potentialReturn Decimal   @db.Decimal(12, 2)
+  oddsSnapshot    Decimal   @db.Decimal(10, 3)
+  status          BetStatus @default(PENDING)
+  placedAt        DateTime  @default(now())
+  settledAt       DateTime?
+
+  @@index([eventId])
+}
+
+model EventWalletTxn {
+  id        String     @id @default(cuid())
+  eventId   String
+  userId    String
+  type      WalletType
+  amount    Decimal    @db.Decimal(12, 2)
+  betId     String?
+  createdAt DateTime   @default(now())
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+  @@index([userId, eventId])
+}
