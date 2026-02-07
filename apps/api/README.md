@@ -1,74 +1,279 @@
-## Description
+FAKE BETTING APP – BACKEND PLANNING NOTES
+========================================
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+GOAL
+----
+A private, invite-only “fake betting” app for things like sports days, office games, etc.
+No public games. No real money. Everything is scoped to a single game.
 
-## Project setup
+----------------------------------------
+CORE TERMINOLOGY (LOCK THIS IN)
+----------------------------------------
 
-```bash
-$ pnpm install
+User
+- A signed-up account (email + password)
 
-## Compile and run the project
+Game
+- A private betting session (e.g. “Sports Day 2026”)
+- Created by a user
+- Joined via a join code only
 
-```bash
-# development
-$ npm run start
+Host
+- The user who created the game
+- Full control over setup and settlement
 
-# watch mode
-$ npm run start:dev
+Member
+- A user who has joined a game
+- Can place bets and view leaderboard
 
-# production mode
-$ npm run start:prod
-```
+Team
+- Competitors in the game (e.g. Red Team, Blue Team)
+- Game-level concept (recommended)
 
-## Run tests
+Market
+- A betting category inside a game
+- Example: “Egg & Spoon Race – Winner”
 
-```bash
-# unit tests
-$ npm run test
+Selection
+- The choices within a market
+- Usually teams (Team A, Team B)
 
-# e2e tests
-$ npm run test:e2e
+Bet
+- A user’s stake on a selection
 
-# test coverage
-$ npm run test:cov
-```
+Ledger / Wallet Transactions
+- Game-scoped wallet transactions
+- CREDIT, DEBIT, PAYOUT, REFUND
+- Balance = sum of transactions per (user + game)
 
-## Deployment
+Leaderboard
+- Ranking of members within a game
+- Based on event-scoped wallet balance
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+----------------------------------------
+HIGH-LEVEL FLOW
+----------------------------------------
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+1. User signs up / logs in
+2. User creates a game
+   - Becomes HOST
+   - Join code generated
+3. Other users join via join code
+   - Become MEMBERS
+   - Get starting chips (default: 1000)
+4. Host/Admin sets up:
+   - Teams
+   - Markets with selections
+5. Members place bets
+6. Host/Admin closes & settles markets
+7. Ledger updates → leaderboard updates
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+----------------------------------------
+GAME RULES
+----------------------------------------
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+- Games are private (join code only)
+- No global wallet
+- Chips are scoped per game
+- Admin chooses ONE winning selection per market (prototype)
+- All balances derived from ledger (never stored directly)
 
-## Resources
+----------------------------------------
+DATA MODEL (CONCEPTUAL)
+----------------------------------------
 
-Check out a few resources that may come in handy when working with NestJS:
+Game
+- id
+- name
+- status (DRAFT | OPEN | CLOSED)
+- joinCode (unique)
+- startingChips (default 1000)
+- createdById
+- timestamps
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+GameMember
+- id
+- gameId
+- userId
+- role (HOST | ADMIN | PLAYER)
+- joinedAt
+- unique (gameId + userId)
 
-## Support
+Team
+- id
+- gameId
+- name
+- optional UI data (color / emoji)
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Market
+- id
+- gameId
+- name
+- status (OPEN | CLOSED | SETTLED)
+- unique (gameId + name)
+- timestamps
 
-## Stay in touch
+Selection
+- id
+- marketId
+- teamId (preferred) OR label (prototype shortcut)
+- decimalOdds
+- status (ACTIVE | WINNER | LOSER)
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Bet
+- id
+- gameId (denormalized)
+- userId
+- marketId
+- selectionId
+- stake
+- oddsSnapshot
+- potentialReturn
+- status (PENDING | WON | LOST)
+- timestamps
 
-## License
+GameWalletTxn
+- id
+- gameId
+- userId
+- type (CREDIT | DEBIT | PAYOUT | REFUND)
+- amount
+- betId? / marketId?
+- timestamps
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+----------------------------------------
+AUTH (PROTOTYPE + FUTURE-PROOF)
+----------------------------------------
+
+- Email + password
+- JWT stored in HttpOnly cookie
+- Cookie sent automatically on requests
+- Backend extracts JWT from cookies
+- /auth/me returns user + game memberships
+
+----------------------------------------
+CORE API ENDPOINTS
+----------------------------------------
+
+AUTH
+----
+POST   /auth/signup
+POST   /auth/login
+POST   /auth/logout
+GET    /auth/me
+
+GAMES
+-----
+POST   /games
+  - Create game
+  - Generate join code
+  - Creator becomes HOST
+
+GET    /games
+  - List games the current user is a member of
+
+GET    /games/:gameId
+  - Game details + markets summary
+
+JOIN (PRIVATE)
+--------------
+POST   /games/join
+  body: { code: "ABCD12" }
+
+POST   /games/:gameId/regenerate-code (HOST only)
+
+MEMBERS
+-------
+GET    /games/:gameId/members
+POST   /games/:gameId/members/:userId/role (HOST)
+POST   /games/:gameId/kick/:userId (optional)
+
+TEAMS
+-----
+POST   /games/:gameId/teams (HOST/ADMIN)
+GET    /games/:gameId/teams
+
+MARKETS
+-------
+POST   /games/:gameId/markets (HOST/ADMIN)
+GET    /games/:gameId/markets
+GET    /markets/:marketId
+POST   /markets/:marketId/close (HOST/ADMIN)
+POST   /markets/:marketId/settle (HOST/ADMIN)
+
+BETS
+----
+POST   /bets
+  body: { selectionId, stake }
+
+GET    /games/:gameId/bets/me
+GET    /markets/:marketId/bets (HOST/ADMIN)
+
+WALLET / LEADERBOARD
+-------------------
+GET    /games/:gameId/balance
+GET    /games/:gameId/leaderboard
+
+----------------------------------------
+REALTIME (WEBSOCKETS)
+----------------------------------------
+
+Rooms:
+- game:<gameId>
+- market:<marketId>
+
+Events:
+- bet:created
+- market:closed
+- market:settled
+- leaderboard:updated
+
+----------------------------------------
+ACCESS CONTROL RULES
+----------------------------------------
+
+- Must be GameMember to:
+  - View game
+  - Place bets
+  - View leaderboard
+
+- Must be HOST or ADMIN to:
+  - Create teams
+  - Create markets
+  - Close / settle markets
+  - Regenerate join code
+
+----------------------------------------
+RECOMMENDED BUILD ORDER (PROTOTYPE)
+----------------------------------------
+
+1. POST /games (create + join code)
+2. POST /games/join (join by code)
+3. GET /games (my games page)
+4. Teams creation
+5. Markets creation
+6. Place bets
+7. Settle markets
+8. Leaderboard
+9. WebSocket polish
+
+----------------------------------------
+JOIN CODE NOTES
+----------------------------------------
+
+- 6 characters
+- Uppercase
+- Exclude confusing chars (0, O, 1, I)
+- Unique index
+- Regeneratable by HOST
+
+----------------------------------------
+KEY DESIGN PRINCIPLES
+----------------------------------------
+
+- Event-scoped everything
+- Ledger-based balances
+- Controllers thin, services thick
+- Guards for permissions
+- No global state
+- Easy to extend later
