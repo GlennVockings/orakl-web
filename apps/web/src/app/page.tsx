@@ -3,6 +3,7 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { Info, Percent, Shield, Trophy } from "lucide-react";
 import { Gorditas } from "next/font/google";
+import Link from "next/link";
 
 
 const gorditas = Gorditas({
@@ -17,12 +18,14 @@ export default function Home() {
 
       {/* GAMBLING DISCLAIMER */}
       <div className="mt-1 rounded-lg border bg-muted px-4 py-3 text-sm text-muted-foreground">
-        <Info className="h-4 w-4 mt-0.5" />
-        <p>
-          <strong>Important:</strong> This platform does <strong>not</strong> involve real money,
-          does <strong>not</strong> facilitate or encourage gambling, and is intended
-          for <strong>entertainment purposes only</strong>.
-        </p>
+        <div className="flex gap-1">
+          <Info className="h-4 w-4 mt-0.5" />
+          <p>
+            <strong>Important:</strong> This platform does <strong>not</strong> involve real money,
+            does <strong>not</strong> facilitate or encourage gambling, and is intended
+            for <strong>entertainment purposes only</strong>.
+          </p>
+        </div>
         <p className="mt-2">
           If gambling is affecting you or someone you know, help is available.
           Visit{" "}
@@ -65,7 +68,9 @@ export default function Home() {
 
         <div className="flex gap-4">
           <Button size="lg">Create a League</Button>
-          <Button size="lg" variant="outline">See How It Works</Button>
+          <Button size="lg" variant="outline" asChild>
+            <Link href="/howitworks">See How It Works</Link>
+          </Button>
         </div>
       </div>
 
