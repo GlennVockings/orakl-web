@@ -1,81 +1,83 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import {
-  DialogClose,
-  DialogFooter,
-} from "@/components/ui/dialog"
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { login } from "@/lib/api"
+import { Controller, useForm } from "react-hook-form"
+import { authClient } from "@/lib/auth-client"
+import { useRouter } from "next/navigation"
+import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field"
 
 const formSchema = z.object({
-	email: z.email(),
+	email: z.string(),
 	password: z.string().min(2, {
-		message: "Password must be at least 2 characters"
-	})
+        message: "Password must be at least 2 characters"
+    })
 })
 
 export const LogInForm = () => {
+	const router = useRouter();
+
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
 			email: "alice@example.com",
-			password: ""
+			password: "password123"
 		}
 	})
 
 	async function onSubmit(values: z.infer<typeof formSchema>) {
-		const me = await login(values.email, values.password)
+		await authClient.signIn.email({ ...values });
 
-		console.log(me)
+		router.push("/account");
+		router.refresh();
 	}
+
+	async function getSession() {
+    const session = await authClient.getSession();
+  }
 	
 	return (
-		<Form {...form}>
+		<div>
 			<form onSubmit={form.handleSubmit(onSubmit)}>
-				<FormField
-					control={form.control}
-					name="email"
-					render={({ field }) => (
-						<FormItem className="py-4">
-							<FormLabel>Email</FormLabel>
-							<FormControl>
-								<Input {...field} />
-							</FormControl>
-						</FormItem>
-					)}
-				/>
-				<FormField
-					control={form.control}
-					name="password"
-					render={({ field }) => (
-						<FormItem className="pb-4">
-							<FormLabel>Password</FormLabel>
-							<FormControl>
-								<Input {...field} />
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-				<DialogFooter>
-					<DialogClose asChild>
-						<Button variant="outline">Cancel</Button>
-					</DialogClose>
-					<Button type="submit">Log in</Button>
-				</DialogFooter>
+				<FieldGroup>
+					<Controller
+						control={form.control}
+						name="email"
+						render={({ field, fieldState }) => (
+							<Field data-invalid={fieldState.invalid}>
+								<FieldLabel htmlFor={field.name}>Email</FieldLabel>
+								<Input 
+									{...field} 
+									id={field.name}
+									aria-invalid={fieldState.invalid} 
+									/>
+								{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+							</Field>
+						)}
+					/>
+					<Controller
+						control={form.control}
+						name="password"
+						render={({ field, fieldState }) => (
+							<Field data-invalid={fieldState.invalid}>
+								<FieldLabel htmlFor={field.name}>Password</FieldLabel>
+								<Input 
+									{...field} 
+									type="password"
+									id={field.name}
+									aria-invalid={fieldState.invalid} 
+									/>
+								{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+							</Field>
+						)}
+					/>
+				</FieldGroup>
+				<Button type="submit">Log in</Button>
 			</form>
-		</Form>
+
+			<button onClick={getSession}>Get session</button>
+		</div>
 	)
 }

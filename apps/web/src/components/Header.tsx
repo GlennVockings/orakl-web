@@ -1,8 +1,8 @@
 import Link from "next/link";
 import ThemeToggle from "./theme-toggle";
-import UserModal from "./user-modal";
+import { AccountButton } from "./AccountButton";
 
-export function SiteHeader() {
+export const SiteHeader = () => {
   return (
     <header className="border-b bg-background/70 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
@@ -23,7 +23,7 @@ export function SiteHeader() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-					<UserModal />
+          <AccountButton />
           <ThemeToggle />
         </div>
       </div>

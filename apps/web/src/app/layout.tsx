@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { SiteHeader, ThemeProvider, Footer } from "@/components";
+import { SiteHeader, ThemeProvider, Footer, SessionProvider } from "@/components";
+import { getSession } from "@/lib/server/get-session";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,16 +24,19 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = getSession();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
+        <SessionProvider initialSession={session}>
+          <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
           >
             <SiteHeader />
             <div className="mx-auto max-w-6xl">
@@ -40,6 +44,7 @@ export default function RootLayout({
             </div>
             <Footer />
           </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );
