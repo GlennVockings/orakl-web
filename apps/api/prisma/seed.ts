@@ -1,145 +1,221 @@
-/* eslint-disable */
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
-import bcrypt from 'bcrypt';
+// /* eslint-disable */
+// import { PrismaClient } from '@prisma/client';
+// import bcrypt from 'bcrypt';
 
-const hash = (p: string) => bcrypt.hash(p, 10);
+// const prisma = new PrismaClient();
 
-async function seed() {
-  console.log('🔰 Seeding start');
+// const hash = (p: string) => bcrypt.hash(p, 10);
 
-  // ----- USERS -----
-  const [alice, bob, charlie, jenny, alex] = await Promise.all([
-    prisma.user.upsert({
-      where: { email: 'alice@example.com' },
-      update: {},
-      create: { email: 'alice@example.com', displayName: 'Alice', role: 'ADMIN', passwordHash: await hash('password123') }, // Alice hosts
-    }),
-    prisma.user.upsert({
-      where: { email: 'bob@example.com' },
-      update: {},
-      create: { email: 'bob@example.com', displayName: 'Bob', role: 'PLAYER', passwordHash: await hash('password123') },
-    }),
-    prisma.user.upsert({
-      where: { email: 'charlie@example.com' },
-      update: {},
-      create: { email: 'charlie@example.com', displayName: 'Charlie', role: 'PLAYER', passwordHash: await hash('password123') },
-    }),
-    prisma.user.upsert({
-      where: { email: 'jenny@example.com' },
-      update: {},
-      create: { email: 'jenny@example.com', displayName: 'Jenny', role: 'PLAYER', passwordHash: await hash('password123') },
-    }),
-    prisma.user.upsert({
-      where: { email: 'alex@example.com' },
-      update: {},
-      create: { email: 'alex@example.com', displayName: 'Alex', role: 'PLAYER', passwordHash: await hash('password123') },
-    }),
-  ]);
+// function genJoinCode() {
+//   // simple deterministic-ish code for demo; feel free to replace with a better generator
+//   return 'SPORTS1';
+// }
 
-  // ----- EVENT (Alice hosts) -----
-  const existingEvent = await prisma.event.findFirst({ where: { name: 'Sports Day Demo' } });
-  const event =
-    existingEvent ??
-    (await prisma.event.create({
-      data: {
-        name: 'Sports Day Demo',
-        startsAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        status: 'OPEN',
-        createdById: alice.id,
-        isPublic: true,
-      },
-    }));
+// async function seed() {
+//   console.log('🔰 Seeding start');
 
-  // Ensure Alice is HOST member
-  await prisma.eventMember.upsert({
-    where: { eventId_userId: { eventId: event.id, userId: alice.id } },
-    update: { role: 'HOST' },
-    create: { eventId: event.id, userId: alice.id, role: 'HOST' },
-  });
+//   // ----- USERS -----
+//   const passwordHash = await hash('password123');
 
-  // ----- JOINERS (Bob, Charlie, Jenny) -----
-  const joiners = [bob, charlie, jenny]; // Alex is purposely left out for testing
-  await prisma.eventMember.createMany({
-    data: joiners.map((u) => ({ eventId: event.id, userId: u.id, role: 'PARTICIPANT' })),
-    skipDuplicates: true,
-  });
+//   const [alice, bob, charlie, jenny, alex] = await Promise.all([
+//     prisma.user.upsert({
+//       where: { email: 'alice@example.com' },
+//       update: { displayName: 'Alice', passwordHash },
+//       create: { email: 'alice@example.com', displayName: 'Alice', passwordHash },
+//     }),
+//     prisma.user.upsert({
+//       where: { email: 'bob@example.com' },
+//       update: { displayName: 'Bob', passwordHash },
+//       create: { email: 'bob@example.com', displayName: 'Bob', passwordHash },
+//     }),
+//     prisma.user.upsert({
+//       where: { email: 'charlie@example.com' },
+//       update: { displayName: 'Charlie', passwordHash },
+//       create: { email: 'charlie@example.com', displayName: 'Charlie', passwordHash },
+//     }),
+//     prisma.user.upsert({
+//       where: { email: 'jenny@example.com' },
+//       update: { displayName: 'Jenny', passwordHash },
+//       create: { email: 'jenny@example.com', displayName: 'Jenny', passwordHash },
+//     }),
+//     prisma.user.upsert({
+//       where: { email: 'alex@example.com' },
+//       update: { displayName: 'Alex', passwordHash },
+//       create: { email: 'alex@example.com', displayName: 'Alex', passwordHash },
+//     }),
+//   ]);
 
-  // Give 1000 credits to joiners (only if they don’t already have any txns in this event)
-  for (const u of joiners) {
-    const hasAny = await prisma.eventWalletTxn.findFirst({ where: { eventId: event.id, userId: u.id } });
-    if (!hasAny) {
-      await prisma.eventWalletTxn.create({
-        data: { eventId: event.id, userId: u.id, type: 'CREDIT', amount: 1000 },
-      });
-    }
-  }
+//   // ----- GAME (Sports Day Demo) -----
+//   const existingGame = await prisma.game.findFirst({
+//     where: { name: 'Sports Day Demo' },
+//   });
 
-  // Also credit Alice (host can play too)
-  const hostHasAny = await prisma.eventWalletTxn.findFirst({ where: { eventId: event.id, userId: alice.id } });
-  if (!hostHasAny) {
-    await prisma.eventWalletTxn.create({
-      data: { eventId: event.id, userId: alice.id, type: 'CREDIT', amount: 1000 },
-    });
-  }
+//   // If the game exists, reuse it. Otherwise create it.
+//   const game =
+//     existingGame ??
+//     (await prisma.game.create({
+//       data: {
+//         name: 'Sports Day Demo',
+//         status: 'OPEN',
+//         joinCode: genJoinCode(),
+//         startingChips: 1000,
+//         createdById: alice.id,
+//         isDemo: true,
+//         isTemplate: false,
+//         lastActivityAt: new Date(),
+//       },
+//     }));
 
-  // ----- MARKETS -----
-  // Upsert helper (by (eventId, name)); if you don’t have @@unique([eventId, name]) yet, this still works.
-  async function findOrCreateMarket(name: string) {
-    const found = await prisma.market.findFirst({ where: { eventId: event.id, name } });
-    if (found) return found;
-    return prisma.market.create({ data: { eventId: event.id, name, status: 'OPEN' } });
-  }
+//   // Ensure joinCode is set to our demo code if you want it stable
+//   // (If you prefer random join codes, remove this update.)
+//   if (game.joinCode !== genJoinCode()) {
+//     await prisma.game.update({
+//       where: { id: game.id },
+//       data: { joinCode: genJoinCode() },
+//     });
+//   }
 
-  const egg = await findOrCreateMarket('Egg & Spoon — Winner');
-  const three = await findOrCreateMarket('3-Legged Race — Winner');
-  const sack = await findOrCreateMarket('Sack Race — Winner');
+//   // ----- MEMBERSHIPS -----
+//   // Alice is HOST
+//   await prisma.gameMember.upsert({
+//     where: { gameId_userId: { gameId: game.id, userId: alice.id } },
+//     update: { role: 'HOST' },
+//     create: { gameId: game.id, userId: alice.id, role: 'HOST' },
+//   });
 
-  // Deterministic selections (clear old on these markets then recreate)
-  await prisma.selection.deleteMany({ where: { marketId: { in: [egg.id, three.id, sack.id] } } });
+//   // Bob/Charlie/Jenny join as PLAYERs. Alex intentionally left out.
+//   const joiners = [bob, charlie, jenny];
 
-  await prisma.selection.createMany({
-    data: [
-      // Egg & Spoon
-      { marketId: egg.id, label: 'Team A', decimalOdds: 1.80 },
-      { marketId: egg.id, label: 'Team B', decimalOdds: 2.10 },
-      { marketId: egg.id, label: 'Team C', decimalOdds: 3.20 },
-      // 3-Legged
-      { marketId: three.id, label: 'Team A', decimalOdds: 2.00 },
-      { marketId: three.id, label: 'Team C', decimalOdds: 1.90 },
-      // Sack Race
-      { marketId: sack.id, label: 'Team B', decimalOdds: 2.40 },
-      { marketId: sack.id, label: 'Team C', decimalOdds: 1.75 },
-    ],
-  });
+//   // Use createMany + skipDuplicates
+//   await prisma.gameMember.createMany({
+//     data: joiners.map((u) => ({
+//       gameId: game.id,
+//       userId: u.id,
+//       role: 'PLAYER',
+//     })),
+//     skipDuplicates: true,
+//   });
 
-  // ----- LOG COUNTS -----
-  const [userCount, eventCount, marketCount, selectionCount, memberCount, walletRows] = await Promise.all([
-    prisma.user.count(),
-    prisma.event.count(),
-    prisma.market.count({ where: { eventId: event.id } }),
-    prisma.selection.count({ where: { market: { eventId: event.id } } }),
-    prisma.eventMember.count({ where: { eventId: event.id } }),
-    prisma.eventWalletTxn.count({ where: { eventId: event.id } }),
-  ]);
+//   // ----- STARTING CHIPS (LEDGER) -----
+//   // CREDIT 1000 chips for members that don't already have a txn in this game
+//   const membersToCredit = [alice, ...joiners];
 
-  console.log('✅ Seed complete', {
-    users: userCount, // 5
-    events: eventCount,
-    marketsInEvent: marketCount, // 3
-    selectionsInEvent: selectionCount, // 7
-    membersInEvent: memberCount, // 4 (Alice + Bob + Charlie + Jenny)
-    eventWalletRows: walletRows, // credits created
-    eventId: event.id,
-    host: 'alice@example.com',
-    joiners: ['bob@example.com', 'charlie@example.com', 'jenny@example.com'],
-    leftOutForTesting: 'alex@example.com',
-  });
-}
+//   for (const u of membersToCredit) {
+//     const hasAny = await prisma.gameLedgerTxn.findFirst({
+//       where: { gameId: game.id, userId: u.id },
+//       select: { id: true },
+//     });
 
-seed()
-  .catch((e) => {
-    console.error('❌ Seed failed:', e);
-    process.exit(1);
-  })
-  .finally(async () => prisma.$disconnect());
+//     if (!hasAny) {
+//       await prisma.gameLedgerTxn.create({
+//         data: {
+//           gameId: game.id,
+//           userId: u.id,
+//           type: 'CREDIT',
+//           amount: 1000,
+//         },
+//       });
+//     }
+//   }
+
+//   // ----- TEAMS -----
+//   // Deterministic: ensure these exist and are unique per (gameId, name)
+//   const teamNames = ['Team A', 'Team B', 'Team C'];
+
+//   const teams = await Promise.all(
+//     teamNames.map((name) =>
+//       prisma.team.upsert({
+//         where: { gameId_name: { gameId: game.id, name } },
+//         update: {},
+//         create: {
+//           gameId: game.id,
+//           name,
+//         },
+//       }),
+//     ),
+//   );
+
+//   const teamA = teams.find((t) => t.name === 'Team A')!;
+//   const teamB = teams.find((t) => t.name === 'Team B')!;
+//   const teamC = teams.find((t) => t.name === 'Team C')!;
+
+//   // ----- MARKETS -----
+//   async function findOrCreateMarket(name: string) {
+//     // You have @@unique([gameId, name]) so we can use upsert properly:
+//     return prisma.market.upsert({
+//       where: { gameId_name: { gameId: game.id, name } },
+//       update: { status: 'OPEN' },
+//       create: { gameId: game.id, name, status: 'OPEN' },
+//     });
+//   }
+
+//   const egg = await findOrCreateMarket('Egg & Spoon — Winner');
+//   const three = await findOrCreateMarket('3-Legged Race — Winner');
+//   const sack = await findOrCreateMarket('Sack Race — Winner');
+//   const bonus = await findOrCreateMarket('Bonus Market — Yes/No (label-only)');
+
+//   // Clear old selections for these markets (deterministic seed)
+//   await prisma.selection.deleteMany({
+//     where: { marketId: { in: [egg.id, three.id, sack.id, bonus.id] } },
+//   });
+
+//   // Create selections: team-based for the races, label-based for a yes/no example
+//   await prisma.selection.createMany({
+//     data: [
+//       // Egg & Spoon (A/B/C)
+//       { marketId: egg.id, teamId: teamA.id, label: 'Team A', decimalOdds: 1.8 },
+//       { marketId: egg.id, teamId: teamB.id, label: 'Team B', decimalOdds: 2.1 },
+//       { marketId: egg.id, teamId: teamC.id, label: 'Team C', decimalOdds: 3.2 },
+
+//       // 3-Legged (A/C)
+//       { marketId: three.id, teamId: teamA.id, label: 'Team A', decimalOdds: 2.0 },
+//       { marketId: three.id, teamId: teamC.id, label: 'Team C', decimalOdds: 1.9 },
+
+//       // Sack Race (B/C)
+//       { marketId: sack.id, teamId: teamB.id, label: 'Team B', decimalOdds: 2.4 },
+//       { marketId: sack.id, teamId: teamC.id, label: 'Team C', decimalOdds: 1.75 },
+
+//       // Label-only market (no teamId)
+//       { marketId: bonus.id, label: 'Yes', decimalOdds: 1.9 },
+//       { marketId: bonus.id, label: 'No', decimalOdds: 1.9 },
+//     ],
+//   });
+
+//   // Update lastActivityAt since we created game content
+//   await prisma.game.update({
+//     where: { id: game.id },
+//     data: { lastActivityAt: new Date() },
+//   });
+
+//   // ----- LOG COUNTS -----
+//   const [userCount, gameCount, marketCount, selectionCount, memberCount, ledgerRows] =
+//     await Promise.all([
+//       prisma.user.count(),
+//       prisma.game.count(),
+//       prisma.market.count({ where: { gameId: game.id } }),
+//       prisma.selection.count({ where: { market: { gameId: game.id } } }),
+//       prisma.gameMember.count({ where: { gameId: game.id } }),
+//       prisma.gameLedgerTxn.count({ where: { gameId: game.id } }),
+//     ]);
+
+//   console.log('✅ Seed complete', {
+//     users: userCount, // 5
+//     games: gameCount,
+//     marketsInGame: marketCount, // 4
+//     selectionsInGame: selectionCount, // 11 (7 team-based + 2 label-only + etc)
+//     membersInGame: memberCount, // 4 (Alice + Bob + Charlie + Jenny)
+//     ledgerRowsInGame: ledgerRows, // credits created
+//     gameId: game.id,
+//     joinCode: genJoinCode(),
+//     host: 'alice@example.com',
+//     joiners: ['bob@example.com', 'charlie@example.com', 'jenny@example.com'],
+//     leftOutForTesting: 'alex@example.com',
+//   });
+// }
+
+// seed()
+//   .catch((e) => {
+//     console.error('❌ Seed failed:', e);
+//     process.exit(1);
+//   })
+//   .finally(async () => prisma.$disconnect());
