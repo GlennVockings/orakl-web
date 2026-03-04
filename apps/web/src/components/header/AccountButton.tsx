@@ -1,12 +1,10 @@
 import { getSession } from "@/lib/server/get-session"
 import { User } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import Link from "next/link";
 
 export const AccountButton = async () => {
 	const session = await getSession();
-
-	console.log(session)
 
 	if (!session?.user ) {
 		return (

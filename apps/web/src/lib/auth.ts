@@ -24,7 +24,11 @@ export const auth = betterAuth({
 
   plugins: [
     bearer(),
-    jwt(),
+    jwt({
+      jwt: {
+        expirationTime: "1h"
+      }
+    }),
   ],
 
   // Helps with cookies/cors when calling /api/auth from browser

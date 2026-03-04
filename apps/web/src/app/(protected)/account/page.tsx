@@ -1,6 +1,5 @@
-import { LogOutDialog } from "@/components";
+import { CreateGameDialog, LogOutDialog, GamesList, JoinGameDialog } from "@/components";
 import { Button } from "@/components/ui/button";
-import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/item";
 
 export default function Account() {
 
@@ -18,30 +17,10 @@ export default function Account() {
         </div>
         <div className="col-span-3 flex flex-col gap-4">
           <p className="text-xl font-bold tracking-wide underline underline-offset-2">Games</p>
-          <div className="grid grid-cols-2 gap-2">
-            <Item variant={"outline"}>
-              <ItemContent>
-                <ItemTitle>Game 1</ItemTitle>
-                <ItemDescription>Sports Day</ItemDescription>
-              </ItemContent>
-              <ItemActions>
-                <Button>Open</Button>
-              </ItemActions>
-            </Item>
-            <Item variant={"outline"}>
-              <ItemContent>
-                <ItemTitle>Game 2</ItemTitle>
-                <ItemDescription>Sports Day</ItemDescription>
-              </ItemContent>
-              <ItemActions>
-                <Button>Open</Button>
-              </ItemActions>
-            </Item>
-          </div>
-          <div>
-            <Button>
-              Create game
-            </Button>
+            <GamesList />
+          <div className="flex gap-4">
+            <CreateGameDialog />
+            <JoinGameDialog />
           </div>
         </div>
       </div>

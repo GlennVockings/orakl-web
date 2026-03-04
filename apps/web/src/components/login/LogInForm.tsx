@@ -5,40 +5,38 @@ import { Input } from "@/components/ui/input"
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
-import { Field, FieldError, FieldGroup, FieldLabel } from "./ui/field"
 import { authClient } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
+import { Field, FieldError, FieldGroup, FieldLabel } from "../ui/field"
 
 const formSchema = z.object({
 	email: z.string(),
 	password: z.string().min(2, {
-    message: "Password must be at least 2 characters"
-  }),
-	name: z.string().min(2, {
-		message: "Name must be be at least 2 characters"
-	})
+        message: "Password must be at least 2 characters"
+    })
 })
 
-export const SignUpForm = () => {
+export const LogInForm = () => {
 	const router = useRouter();
-	
+
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
 		defaultValues: {
-			email: "",
-			password: "",
-			name: "",
+			email: "alice@example.com",
+			password: "password123"
 		}
 	})
 
 	async function onSubmit(values: z.infer<typeof formSchema>) {
-		console.log(values)
-
-		await authClient.signUp.email({ ...values })
+		await authClient.signIn.email({ ...values });
 
 		router.push("/account");
 		router.refresh();
 	}
+
+	async function getSession() {
+    const session = await authClient.getSession();
+  }
 	
 	return (
 		<div>
@@ -51,10 +49,10 @@ export const SignUpForm = () => {
 							<Field data-invalid={fieldState.invalid}>
 								<FieldLabel htmlFor={field.name}>Email</FieldLabel>
 								<Input 
-									{...field}
+									{...field} 
 									id={field.name}
-									aria-invalid={fieldState.invalid}
-								/>
+									aria-invalid={fieldState.invalid} 
+									/>
 								{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
 							</Field>
 						)}
@@ -70,29 +68,16 @@ export const SignUpForm = () => {
 									type="password"
 									id={field.name}
 									aria-invalid={fieldState.invalid} 
-								/>
+									/>
 								{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
 							</Field>
 						)}
-						/>
-						<Controller
-						control={form.control}
-						name="name"
-						render={({ field, fieldState }) => (
-							<Field data-invalid={fieldState.invalid}>
-								<FieldLabel htmlFor={field.name}>Name</FieldLabel>
-								<Input 
-									{...field}
-									id={field.name}
-									aria-invalid={fieldState.invalid}  
-								/>
-								{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-							</Field>
-						)}
-						/>
+					/>
 				</FieldGroup>
-				<Button type="submit">Sign up</Button>
+				<Button type="submit">Log in</Button>
 			</form>
+
+			<button onClick={getSession}>Get session</button>
 		</div>
 	)
 }

@@ -1,13 +1,13 @@
 "use client"
 
-import { authClient } from "@/lib/auth-client";
-import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog"
+import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog"
 import { useRouter } from "next/navigation";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
+import { authClient } from "@/lib/auth-client";
 
 export const LogOutDialog = () => {
 	const router = useRouter();
-	
+
 	async function logout() {
 		await authClient.signOut();
 

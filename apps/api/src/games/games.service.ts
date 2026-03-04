@@ -1,7 +1,22 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateGameDto } from './dto/create-game.dto';
+import { LedgerType } from '@prisma/client';
+
+function txnSign(type: LedgerType) {
+  // CREDIT/PAYOUT/REFUND add, DEBIT subtract
+  switch (type) {
+    case 'DEBIT':
+      return -1;
+    case 'CREDIT':
+    case 'PAYOUT':
+    case 'REFUND':
+    default:
+      return 1;
+  }
+}
 
 @Injectable()
 export class GamesService {
@@ -36,7 +51,7 @@ export class GamesService {
 
   async createGame(userId: string, dto: CreateGameDto) {
     for (let i = 0; i < 10; i++) {
-      const joinCode = this.generateJoinCode(6);
+      const joinCode = await this.generateUniqueJoinCode();
 
       try {
         const game = await this.prisma.game.create({
@@ -66,5 +81,86 @@ export class GamesService {
     }
 
     throw new Error('Failed to generate unique join code');
+  }
+
+  async getAll(userId: string) {
+    const games = await this.prisma.game.findMany({
+      where: {
+        members: {
+          some: {
+            userId,
+          },
+        },
+      },
+      orderBy: { lastActivityAt: 'desc' },
+      include: {
+        members: {
+          include: {
+            user: { select: { id: true, displayName: true } },
+          },
+        },
+      },
+    });
+
+    if (games.length === 0) return [];
+
+    const gameIds = games.map((g) => g.id);
+
+    const txns = await this.prisma.gameLedgerTxn.findMany({
+      where: { gameId: { in: gameIds } },
+      select: { gameId: true, userId: true, type: true, amount: true },
+    });
+
+    const balanceByGameUser = new Map<string, Map<string, number>>();
+
+    for (const t of txns) {
+      const sign = txnSign(t.type);
+      const amt = Number(t.amount) * sign;
+
+      let byUser = balanceByGameUser.get(t.gameId);
+      if (!byUser) {
+        byUser = new Map<string, number>();
+        balanceByGameUser.set(t.gameId, byUser);
+      }
+      byUser.set(t.userId, (byUser.get(t.userId) ?? 0) + amt);
+    }
+
+    return games.map((g) => {
+      const myMembership = g.members.find((m) => m.userId === userId);
+      const byUser = balanceByGameUser.get(g.id) ?? new Map();
+
+      const myBalance = byUser.get(userId) ?? g.startingChips;
+
+      const leaderboard = g.members
+        .map((m) => ({
+          userId: m.userId,
+          displayName: m.user.displayName,
+          balance: byUser.get(m.userId) ?? g.startingChips,
+        }))
+        .sort((a, b) => b.balance - a.balance);
+
+      const lastSeenAt = myMembership?.lastSeenAt ?? g.createdAt;
+      const hasUpdates = g.lastActivityAt > lastSeenAt;
+
+      return {
+        id: g.id,
+        name: g.name,
+        status: g.status,
+        joinCode: g.joinCode,
+        startingChips: g.startingChips,
+        lastActivityAt: g.lastActivityAt,
+
+        myMembership: myMembership
+          ? {
+              role: myMembership.role,
+              lastSeenAt: myMembership.lastSeenAt,
+              balance: myBalance,
+              hasUpdates,
+            }
+          : null,
+
+        leaderboard,
+      };
+    });
   }
 }
