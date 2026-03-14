@@ -1,9 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateGameDto } from './dto/create-game.dto';
-import { LedgerType } from '@prisma/client';
+import { LedgerType, Prisma } from '@prisma/client';
+import { JoinGameDto } from './dto/join-game.dto';
 
 function txnSign(type: LedgerType) {
   // CREDIT/PAYOUT/REFUND add, DEBIT subtract
@@ -52,22 +57,39 @@ export class GamesService {
   async createGame(userId: string, dto: CreateGameDto) {
     for (let i = 0; i < 10; i++) {
       const joinCode = await this.generateUniqueJoinCode();
+      const startingChips = dto.startingChips ?? 1000;
+      const now = new Date();
 
       try {
-        const game = await this.prisma.game.create({
-          data: {
-            name: dto.name,
-            joinCode,
-            startingChips: dto.startingChips ?? 1000,
-            createdById: userId,
-            status: 'DRAFT',
-            members: {
-              create: {
-                userId,
-                role: 'HOST',
+        const game = await this.prisma.$transaction(async (tx) => {
+          const createdGame = await tx.game.create({
+            data: {
+              name: dto.name,
+              joinCode,
+              startingChips,
+              createdById: userId,
+              status: 'DRAFT',
+              lastActivityAt: now,
+              members: {
+                create: {
+                  userId,
+                  role: 'HOST',
+                  lastSeenAt: now,
+                },
               },
             },
-          },
+          });
+
+          await tx.gameLedgerTxn.create({
+            data: {
+              gameId: createdGame.id,
+              userId,
+              type: 'CREDIT',
+              amount: startingChips,
+            },
+          });
+
+          return createdGame;
         });
 
         return game;
@@ -162,5 +184,83 @@ export class GamesService {
         leaderboard,
       };
     });
+  }
+
+  async joinGame(userId: string, dto: JoinGameDto) {
+    const joinCode = dto.joinCode.trim().toUpperCase();
+
+    const game = await this.prisma.game.findFirst({
+      where: { joinCode },
+      select: {
+        id: true,
+        name: true,
+        status: true,
+        joinCode: true,
+        startingChips: true,
+        createdAt: true,
+      },
+    });
+
+    if (!game)
+      throw new BadRequestException('Join code is incorrect or does not exist');
+
+    if (game.status === 'CLOSED')
+      throw new ForbiddenException('This game is closed');
+
+    const now = new Date();
+
+    const result = await this.prisma.$transaction(async (tx) => {
+      // 1) Create membership (or no-op if already exists)
+      // Because you have @@unique([gameId, userId]) on GameMember
+      const membership = await tx.gameMember.upsert({
+        where: { gameId_userId: { gameId: game.id, userId } },
+        update: {
+          // If they re-join, just bump lastSeenAt
+          lastSeenAt: now,
+        },
+        create: {
+          gameId: game.id,
+          userId,
+          role: 'PLAYER',
+          lastSeenAt: now,
+        },
+      });
+
+      // 2) Give starting chips once (if no txns exist for this user in this game)
+      const hasAnyTxn = await tx.gameLedgerTxn.findFirst({
+        where: { gameId: game.id, userId },
+        select: { id: true },
+      });
+
+      if (!hasAnyTxn) {
+        await tx.gameLedgerTxn.create({
+          data: {
+            gameId: game.id,
+            userId,
+            type: 'CREDIT',
+            amount: new Prisma.Decimal(game.startingChips),
+          },
+        });
+      }
+
+      // 3) Touch game activity (so other users see "updates")
+      await tx.game.update({
+        where: { id: game.id },
+        data: { lastActivityAt: now },
+      });
+
+      return { game, membership };
+    });
+
+    return result;
+  }
+
+  async markSeen(userId: string, gameId: string) {
+    const now = new Date();
+    await this.prisma.gameMember.update({
+      where: { gameId_userId: { gameId, userId } },
+      data: { lastSeenAt: now },
+    });
+    return { ok: true };
   }
 }

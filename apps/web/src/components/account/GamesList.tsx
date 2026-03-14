@@ -5,6 +5,7 @@ import { BadgeAlert, Info, Trash2 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import useSWR from 'swr'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
+import Link from "next/link";
 
 interface Game {
 	id: string;
@@ -42,7 +43,11 @@ export const GamesList = () => {
 							<CardHeader>
 								<CardTitle>{ game.name }</CardTitle>
 								<CardDescription>Join code: { game.joinCode }</CardDescription>
-								<BadgeAlert color="#db2114" className="absolute right-4 top-4" />
+								{ game.myMembership.hasUpdates ? (
+									<BadgeAlert color="#db2114" className="absolute right-4 top-4" />
+								) : (
+									<></>
+								)}
 							</CardHeader>
 							<CardContent>
 								<div>
@@ -52,7 +57,9 @@ export const GamesList = () => {
 								</div>
 							</CardContent>
 							<CardFooter className="flex gap-2 justify-end">
-								<Button>Open</Button>
+								<Button asChild>
+									<Link href={`/game/${game.id}`}>Open</Link>
+								</Button>
 								<Button variant={"destructive"} size={"icon"}><Trash2 /></Button>
 							</CardFooter>
 						</Card>

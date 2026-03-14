@@ -31,7 +31,7 @@ export const CreateGameDialog = () => {
 
 	async function onSubmit(values: z.infer<typeof formSchema>) {
 		console.log(values)
-		await apiFetch("/games", {
+		await apiFetch("/games/create", {
 			method: "POST",
 			body: JSON.stringify({ ...values })
 		})
@@ -53,15 +53,15 @@ export const CreateGameDialog = () => {
 							name="name"
 							render={({ field, fieldState}) => (
 								<Field data-invalid={fieldState.invalid}>
-								<FieldLabel htmlFor={field.name}>Name</FieldLabel>
-								<Input 
-									{...field} 
-									placeholder="Sports Day"
-									id={field.name}
-									aria-invalid={fieldState.invalid} 
-									/>
-								{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
-							</Field>
+									<FieldLabel htmlFor={field.name}>Name</FieldLabel>
+									<Input 
+										{...field} 
+										placeholder="Sports Day"
+										id={field.name}
+										aria-invalid={fieldState.invalid} 
+										/>
+									{fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+								</Field>
 							)}
 						/>
 						<Controller
