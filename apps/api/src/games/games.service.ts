@@ -263,4 +263,23 @@ export class GamesService {
     });
     return { ok: true };
   }
+
+  async getGame(userId: string, gameId: string) {
+    const game = await this.prisma.game.findFirst({
+      where: { id: gameId },
+      select: {
+        id: true,
+        name: true,
+        status: true,
+        joinCode: true,
+        startingChips: true,
+        createdAt: true,
+      },
+    });
+
+    if (!game)
+      throw new BadRequestException('id is incorrect or does not exist');
+
+    return game;
+  }
 }

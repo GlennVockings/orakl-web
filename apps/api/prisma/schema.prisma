@@ -60,10 +60,11 @@ model User {
   passwordHash String? // null allowed for prototype-only presets if you want
 
   // Relationships
-  memberships  GameMember[]
-  gamesCreated Game[]          @relation("GamesCreatedBy")
-  bets         Bet[]
-  ledgerTxns   GameLedgerTxn[]
+  memberships          GameMember[]
+  gamesCreated         Game[]                @relation("GamesCreatedBy")
+  bets                 Bet[]
+  ledgerTxns           GameLedgerTxn[]
+  leaderboardSnapshots LeaderboardSnapshot[]
 
   // Optional: tutorial state
   // onboarding OnboardingState?
@@ -111,11 +112,12 @@ model Game {
   lastActivityAt DateTime  @default(now())
 
   // Relationships
-  members    GameMember[]
-  teams      Team[]
-  markets    Market[]
-  bets       Bet[]
-  ledgerTxns GameLedgerTxn[]
+  members              GameMember[]
+  teams                Team[]
+  markets              Market[]
+  bets                 Bet[]
+  ledgerTxns           GameLedgerTxn[]
+  leaderboardSnapshots LeaderboardSnapshot[]
 
   @@index([createdById])
 }
@@ -138,13 +140,14 @@ model Team {
 }
 
 model Market {
-  id         String          @id @default(cuid())
-  gameId     String
-  name       String
-  status     MarketStatus    @default(OPEN)
-  createdAt  DateTime        @default(now())
-  updatedAt  DateTime        @updatedAt
-  ledgerTxns GameLedgerTxn[]
+  id                   String                @id @default(cuid())
+  gameId               String
+  name                 String
+  status               MarketStatus          @default(OPEN)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  ledgerTxns           GameLedgerTxn[]
+  leaderboardSnapshots LeaderboardSnapshot[]
 
   game       Game        @relation(fields: [gameId], references: [id], onDelete: Cascade)
   selections Selection[]
@@ -275,4 +278,22 @@ model Jwks {
   updatedAt  DateTime @updatedAt
 
   @@map("jwks")
+}
+
+model LeaderboardSnapshot {
+  id             String   @id @default(cuid())
+  gameId         String
+  marketId       String
+  userId         String
+  settledBalance Decimal  @db.Decimal(12, 2)
+  rank           Int
+  createdAt      DateTime @default(now())
+
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  market Market @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([gameId, createdAt])
+  @@index([gameId, userId, createdAt])
+  @@index([marketId])
 }

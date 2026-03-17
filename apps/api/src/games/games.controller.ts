@@ -41,6 +41,13 @@ export class GamesController {
   }
 
   @UseGuards(BetterAuthJwtGuard)
+  @Get(':gameId')
+  async getGame(@Req() req: any, @Param('gameId') gameId: string) {
+    const userId = getUserIdFromJwtPayload(req.user);
+    return this.games.getGame(userId, gameId);
+  }
+
+  @UseGuards(BetterAuthJwtGuard)
   @Patch(':gameId/seen')
   async markSeen(@Req() req: any, @Param('gameId') gameId: string) {
     const userId = getUserIdFromJwtPayload(req.user);

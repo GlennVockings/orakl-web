@@ -1,8 +1,11 @@
+"use client"
+
+import useSWR from "swr";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "./ui/table"
 import { LeaderboardRow } from "./LeaderboardRow"
-import { ReactHTMLElement, ReactNode } from "react"
 import { ScrollArea } from "./ui/scroll-area"
-import { ChevronDown, ChevronUp } from "lucide-react"
+import { ChevronDown } from "lucide-react"
+import { apiFetch } from "@/lib/api"
 
 const leaderboardDummy = [
 	{
@@ -127,7 +130,36 @@ const leaderboardDummy = [
 	}
 ]
 
-export const Leaderboard = () => {
+interface LeaderboardEntry {
+	pos: number;
+	name: string;
+	budget: number;
+	prevPos: number;
+}
+
+const fetcher = (gameId: string) =>
+	apiFetch<LeaderboardEntry[]>(`/games/${gameId}/leaderboard`, {
+		method: "GET",
+	})
+
+export const Leaderboard = ({ gameId } : { gameId: string }) => {
+	const { data: leaderboard, error, isLoading } = useSWR(
+    ["leaderboard", gameId],
+    ([, id]) => fetcher(id),
+    {
+      revalidateOnFocus: false,
+    }
+  );
+
+	console.log(leaderboard)
+
+  if (isLoading) {
+    return <div className="p-2">Loading leaderboard...</div>;
+  }
+
+  if (error) {
+    return <div className="p-2">Failed to load leaderboard.</div>;
+  }
 
 	return (
 		<div className="p-2 bg-muted/50 rounded-lg relative shadow-md shadow-accent/50">
