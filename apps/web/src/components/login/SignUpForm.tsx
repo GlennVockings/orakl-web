@@ -42,7 +42,7 @@ export const SignUpForm = () => {
 	
 	return (
 		<div>
-			<form onSubmit={form.handleSubmit(onSubmit)}>
+			<form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-7">
 				<FieldGroup>
 					<Controller
 						control={form.control}

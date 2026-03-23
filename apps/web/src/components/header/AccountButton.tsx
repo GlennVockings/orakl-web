@@ -8,7 +8,7 @@ export const AccountButton = async () => {
 
 	if (!session?.user ) {
 		return (
-			<Button asChild>
+			<Button asChild size={"lg"}>
 					<Link href="/login">Join the fun</Link>
 			</Button>
 		)

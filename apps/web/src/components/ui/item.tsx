@@ -35,9 +35,9 @@ const itemVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-accent text-accent-foreground",
+        default: "bg-background text-accent-foreground",
         outline: "border-border",
-        muted: "bg-muted/50",
+        muted: "bg-muted",
       },
       size: {
         default: "p-4 gap-4 ",
@@ -76,8 +76,8 @@ const itemMediaVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-transparent",
-        icon: "size-8 border rounded-sm bg-muted [&_svg:not([class*='size-'])]:size-4",
+        default: "bg-muted",
+        icon: "size-8 shadow-3xs shadow-primary rounded-sm bg-primary [&_svg:not([class*='size-'])]:size-4",
         image:
           "size-10 rounded-sm overflow-hidden [&_img]:size-full [&_img]:object-cover",
       },

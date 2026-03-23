@@ -40,7 +40,7 @@ export const LogInForm = () => {
 	
 	return (
 		<div>
-			<form onSubmit={form.handleSubmit(onSubmit)}>
+			<form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-7">
 				<FieldGroup>
 					<Controller
 						control={form.control}
@@ -76,8 +76,6 @@ export const LogInForm = () => {
 				</FieldGroup>
 				<Button type="submit">Log in</Button>
 			</form>
-
-			<button onClick={getSession}>Get session</button>
 		</div>
 	)
 }

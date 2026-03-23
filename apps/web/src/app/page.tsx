@@ -1,23 +1,16 @@
 import { Button } from "@/components/ui/button";
+import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { Info, Percent, Shield, Trophy } from "lucide-react";
-import { Gorditas } from "next/font/google";
+import { HandCoins, Info, Percent, Shield, TrendingUpDown, Trophy, UserPlus } from "lucide-react";
 import Link from "next/link";
-
-
-const gorditas = Gorditas({
-  variable: "--font-gorditas",
-  subsets: ["latin"],
-  weight: "700"
-});
 
 export default function Home() {
   return (
-    <div className="py-3">
+    <div className="my-10">
 
       {/* GAMBLING DISCLAIMER */}
-      <div className="mt-1 rounded-lg border bg-muted px-4 py-3 text-sm text-muted-foreground">
+      {/* <div className="mt-1 rounded-lg border bg-muted px-4 py-3 text-sm text-muted-foreground">
         <div className="flex gap-1">
           <Info className="h-4 w-4 mt-0.5" />
           <p>
@@ -48,16 +41,20 @@ export default function Home() {
           </a>{" "}
           for free, confidential support.
         </p>
-      </div>
+      </div> */}
 
       {/* Hero */}
-      <div className="flex flex-col gap-6 py-16">
+      <div className="w-96 h-96 bg-primary/5 absolute left-1/2 -translate-x-1/2 blur-3xl rounded-b-full"></div>
+      <div className="flex flex-col gap-6 py-6">
         <div>
-          <p className={cn("text-5xl text-primary whitespace-nowrap", gorditas.className)}>
-            THE COMPETITION IS REAL
+          <p className={cn("text-5xl uppercase text-foreground whitespace-nowrap font-[Space_Grotesk]")}>
+            Predict.
           </p>
-          <p className={cn("text-3xl text-foreground whitespace-nowrap", gorditas.className)}>
-            BUT THE MONEY IS FAKE
+          <p className={cn("text-5xl uppercase text-foreground whitespace-nowrap font-[Space_Grotesk]")}>
+            Compete.
+          </p>
+          <p className={cn("text-5xl uppercase whitespace-nowrap font-[Space_Grotesk] text-primary")}>
+            Climb.
           </p>
         </div>
 
@@ -66,50 +63,53 @@ export default function Home() {
           No risk. All bragging rights.
         </p>
 
-        <div className="flex gap-4">
+        <div className="gap-4 hidden md:flex">
           <Button size="lg">Create a League</Button>
           <Button size="lg" variant="outline" asChild>
             <Link href="/howitworks">See How It Works</Link>
           </Button>
         </div>
+
+        <Button size="xl" className="w-full md:hidden">Create a League</Button>
       </div>
 
-      <Separator />
-
       {/* Carousel / Info Cards */}
-      <div className="py-7">
-        <div className="grid grid-cols-3 gap-3">
-          <div className="bg-primary text-primary-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm">
-            <div className="flex justify-center flex-col items-center gap-3">
-              <Percent />
-              <p className="font-semibold tracking-wide">Create the odds</p>
+      <div className="py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          {/* Card */}
+          <div className="bg-card text-card-foreground flex flex-col gap-4 rounded-xl p-6 border-l-4 border-primary">
+            <div className="flex justify-center flex-col items-start gap-4">
+              <Percent color="#2CE6FF" />
+              <p className="uppercase font-[Space_Grotesk] text-lg">Create the odds</p>
             </div>
             <div>
-              <p className="text-sm text-primary-foreground/80 text-center px-6">
+              <p className="text-sm text-card-foreground/80">
                 Set your own lines for matches, events, or ridiculous outcomes.
                 House rules are yours.
               </p>
             </div>
           </div>
-          <div className="bg-primary text-primary-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm">
-            <div className="flex justify-center flex-col items-center gap-3">
-              <Trophy />
-              <p className="font-semibold tracking-wide">Earn bragging rights</p>
+          {/* Card */}
+          <div className="bg-card text-card-foreground flex flex-col gap-4 rounded-xl p-6 border-l-4 border-primary">
+            <div className="flex justify-center flex-col items-start gap-4">
+              <Trophy color="#2CE6FF" />
+              <p className="uppercase font-[Space_Grotesk] text-lg">Earn bragging rights</p>
             </div>
             <div>
-              <p className="text-sm text-primary-foreground/80 text-center px-6">
+              <p className="text-sm text-card-foreground/80">
                 Track wins, streaks, and leaderboards.
                 Screenshots encouraged. Excuses not accepted.
               </p>
             </div>
           </div>
-          <div className="bg-primary text-primary-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm">
-            <div className="flex justify-center flex-col items-center gap-3">
-              <Shield />
-              <p className="font-semibold tracking-wide">Zero risk</p>
+          {/* Card */}
+          <div className="bg-card text-card-foreground flex flex-col gap-4 rounded-xl p-6 border-l-4 border-primary">
+            <div className="flex justify-center flex-col items-start gap-4">
+              <Shield color="#2CE6FF" />
+              <p className="uppercase font-[Space_Grotesk] text-lg">Zero risk</p>
             </div>
             <div>
-              <p className="text-sm text-primary-foreground/80 text-center px-6">
+              <p className="text-sm text-card-foreground/80">
                 No real money. No deposits. No regret.
                 Just competition with friends.
               </p>
@@ -118,43 +118,50 @@ export default function Home() {
         </div>
       </div>
 
-      <Separator />
-
       {/* HOW IT WORKS */}
-      <div className="py-16">
-        <h2 className="text-3xl font-bold mb-10">How it works</h2>
+      <div className="py-6">
+        <div className="w-96 h-40 bg-primary/8 absolute left-1/2 -translate-x-1/2 blur-3xl rounded-b-full"></div>
+        <h2 className="text-4xl mb-6 uppercase font-[Space_Grotesk]">How it <span className="text-primary">works</span></h2>
 
-        <div className="grid grid-cols-3 gap-8">
-          <div>
-            <p className="text-xl font-semibold mb-2">1. Create a league</p>
-            <p className="text-muted-foreground">
-              Invite friends and choose what you’re betting on — sports, events, or chaos.
-            </p>
-          </div>
-
-          <div>
-            <p className="text-xl font-semibold mb-2">2. Set the odds</p>
-            <p className="text-muted-foreground">
-              You’re the bookmaker. Decide the lines and let everyone react.
-            </p>
-          </div>
-
-          <div>
-            <p className="text-xl font-semibold mb-2">3. Climb the board</p>
-            <p className="text-muted-foreground">
-              Fake money bets, real rankings, eternal trash talk.
-            </p>
-          </div>
+        <div className="h-14 flex gap-4 items-center mb-6">
+          <Separator orientation={"vertical"} className="bg-primary" />
+          <p className="text-white/60">A fun, competitive prediction game using virtual chips - no real money involved.</p>
         </div>
-      </div>
 
-      <div className="py-12 bg-muted rounded-xl">
-        <p className="text-center text-xl italic">
-          “I’m up 10,000 fake dollars and I won’t shut up about it.”
-        </p>
-        <p className="text-center text-sm text-muted-foreground mt-2">
-          — Everyone, eventually
-        </p>
+        <div className="flex flex-col gap-4">
+          <Item variant={"muted"}>
+            <ItemMedia variant="icon">
+              <UserPlus color="#0C0D1B" />
+            </ItemMedia>
+            <ItemContent className="gap-2">
+              <p className="text-primary uppercase font-[Space_Grotesk] text-xs">Step 01</p>
+              <ItemTitle>Join a Game</ItemTitle>
+              <ItemDescription>Enter high-stakes competitive leagues or quick casual games with the community.</ItemDescription>
+            </ItemContent>
+          </Item>
+
+          <Item variant={"muted"}>
+            <ItemMedia variant="icon">
+              <HandCoins color="#0C0D1B" />
+            </ItemMedia>
+            <ItemContent className="gap-2">
+              <p className="text-primary uppercase font-[Space_Grotesk] text-xs">Step 02</p>
+              <ItemTitle>Get Chips</ItemTitle>
+              <ItemDescription>Every participant starts with a fresh stack of virtual credits to power their predictions.</ItemDescription>
+            </ItemContent>
+          </Item>
+
+          <Item variant={"muted"}>
+            <ItemMedia variant="icon">
+              <TrendingUpDown color="#0C0D1B" />
+            </ItemMedia>
+            <ItemContent className="gap-2">
+              <p className="text-primary uppercase font-[Space_Grotesk] text-xs">Step 03</p>
+              <ItemTitle>Make Predictions</ItemTitle>
+              <ItemDescription>Analyze the market, evaluate odds, and place your virual chips on likely outcomes.</ItemDescription>
+            </ItemContent>
+          </Item>
+        </div>
       </div>
 
       <div className="py-16 text-center">

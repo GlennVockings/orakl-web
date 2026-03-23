@@ -1,18 +1,19 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { SiteHeader, ThemeProvider, Footer, SessionProvider } from "@/components";
 import { getSession } from "@/lib/server/get-session";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
-});
+})
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
   subsets: ["latin"],
-});
+  weight: "700"
+})
 
 export const metadata: Metadata = {
   title: "Faux Stakes",
@@ -29,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${spaceGrotesk.variable} ${inter.variable} antialiased`}
       >
         <SessionProvider initialSession={session}>
           <ThemeProvider
@@ -39,7 +40,7 @@ export default function RootLayout({
           disableTransitionOnChange
           >
             <SiteHeader />
-            <div className="mx-auto max-w-6xl">
+            <div className="mx-auto max-w-sm lg:max-w-6xl bg-background">
               {children}
             </div>
             <Footer />
