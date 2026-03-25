@@ -59,15 +59,11 @@ export default function Home() {
         </div>
 
         <p className="max-w-xl text-muted-foreground text-lg">
-          Create custom odds, place fake bets with friends, and climb the leaderboard.
-          No risk. All bragging rights.
+          Make predictions. Set ridiculous odds. Prove you were right. A fake-stakes game built for friends, chaos, and bragging rights.
         </p>
 
         <div className="gap-4 hidden md:flex">
           <Button size="lg">Create a League</Button>
-          <Button size="lg" variant="outline" asChild>
-            <Link href="/howitworks">See How It Works</Link>
-          </Button>
         </div>
 
         <Button size="xl" className="w-full md:hidden">Create a League</Button>
@@ -80,12 +76,12 @@ export default function Home() {
           <div className="bg-card text-card-foreground flex flex-col gap-4 rounded-xl p-6 border-l-4 border-primary">
             <div className="flex justify-center flex-col items-start gap-4">
               <Percent color="#2CE6FF" />
-              <p className="uppercase font-[Space_Grotesk] text-lg">Create the odds</p>
+              <p className="uppercase font-[Space_Grotesk] text-lg">Set the odds</p>
             </div>
             <div>
               <p className="text-sm text-card-foreground/80">
-                Set your own lines for matches, events, or ridiculous outcomes.
-                House rules are yours.
+                Decide the outcomes, make the lines fair or completely unhinged.
+                Your league, your rules.
               </p>
             </div>
           </div>
@@ -93,12 +89,12 @@ export default function Home() {
           <div className="bg-card text-card-foreground flex flex-col gap-4 rounded-xl p-6 border-l-4 border-primary">
             <div className="flex justify-center flex-col items-start gap-4">
               <Trophy color="#2CE6FF" />
-              <p className="uppercase font-[Space_Grotesk] text-lg">Earn bragging rights</p>
+              <p className="uppercase font-[Space_Grotesk] text-lg">Back yourself</p>
             </div>
             <div>
               <p className="text-sm text-card-foreground/80">
-                Track wins, streaks, and leaderboards.
-                Screenshots encouraged. Excuses not accepted.
+                Put your chips where your mouth is.
+                Wins feel good. Receipts feel better.
               </p>
             </div>
           </div>
@@ -106,12 +102,12 @@ export default function Home() {
           <div className="bg-card text-card-foreground flex flex-col gap-4 rounded-xl p-6 border-l-4 border-primary">
             <div className="flex justify-center flex-col items-start gap-4">
               <Shield color="#2CE6FF" />
-              <p className="uppercase font-[Space_Grotesk] text-lg">Zero risk</p>
+              <p className="uppercase font-[Space_Grotesk] text-lg">No real stakes</p>
             </div>
             <div>
               <p className="text-sm text-card-foreground/80">
-                No real money. No deposits. No regret.
-                Just competition with friends.
+                No money involved. No deposits. No losses.
+                Just pride on the line.
               </p>
             </div>
           </div>
@@ -125,7 +121,7 @@ export default function Home() {
 
         <div className="h-14 flex gap-4 items-center mb-6">
           <Separator orientation={"vertical"} className="bg-primary" />
-          <p className="text-white/60">A fun, competitive prediction game using virtual chips - no real money involved.</p>
+          <p className="text-white/60">A simple game: make predictions, commit your chips, and see who comes out on top.</p>
         </div>
 
         <div className="flex flex-col gap-4">
@@ -135,8 +131,8 @@ export default function Home() {
             </ItemMedia>
             <ItemContent className="gap-2">
               <p className="text-primary uppercase font-[Space_Grotesk] text-xs">Step 01</p>
-              <ItemTitle>Join a Game</ItemTitle>
-              <ItemDescription>Enter high-stakes competitive leagues or quick casual games with the community.</ItemDescription>
+              <ItemTitle>Join a League</ItemTitle>
+              <ItemDescription>Create one with friends or jump into an existing game. The more opinions, the better.</ItemDescription>
             </ItemContent>
           </Item>
 
@@ -146,8 +142,11 @@ export default function Home() {
             </ItemMedia>
             <ItemContent className="gap-2">
               <p className="text-primary uppercase font-[Space_Grotesk] text-xs">Step 02</p>
-              <ItemTitle>Get Chips</ItemTitle>
-              <ItemDescription>Every participant starts with a fresh stack of virtual credits to power their predictions.</ItemDescription>
+              <ItemTitle>Get Your Chips</ItemTitle>
+              <ItemDescription>
+                Everyone starts with the same stack.
+                What you do with it is up to you.
+              </ItemDescription>
             </ItemContent>
           </Item>
 
@@ -157,20 +156,34 @@ export default function Home() {
             </ItemMedia>
             <ItemContent className="gap-2">
               <p className="text-primary uppercase font-[Space_Grotesk] text-xs">Step 03</p>
-              <ItemTitle>Make Predictions</ItemTitle>
-              <ItemDescription>Analyze the market, evaluate odds, and place your virual chips on likely outcomes.</ItemDescription>
+              <ItemTitle>Make Your Picks</ItemTitle>
+              <ItemDescription>
+                Choose an outcome, back it with chips, and lock it in.
+                No changing your mind later.
+              </ItemDescription>
+            </ItemContent>
+          </Item>
+
+          <Item variant={"muted"}>
+            <ItemMedia variant="icon">
+              <TrendingUpDown color="#0C0D1B" />
+            </ItemMedia>
+            <ItemContent className="gap-2">
+              <p className="text-primary uppercase font-[Space_Grotesk] text-xs">Step 04</p>
+              <ItemTitle>Watch It Play Out</ItemTitle>
+              <ItemDescription>
+                When results come in, chips move and the table updates.
+                Climb the leaderboard or fall trying.
+              </ItemDescription>
             </ItemContent>
           </Item>
         </div>
       </div>
 
-      <div className="py-16 text-center">
-        <h2 className="text-3xl font-bold mb-4">
-          Ready to prove you know ball?
+      <div className="bg-accent mt-6 py-8 text-center rounded-md">
+        <h2 className="text-3xl uppercase font-[Space_Grotesk] mb-4">
+          Ready to <span className="text-accent-foreground">prove it?</span>
         </h2>
-        <p className="text-muted-foreground mb-6">
-          Or at least talk like you do.
-        </p>
         <Button size="lg">Start a League</Button>
       </div>
 

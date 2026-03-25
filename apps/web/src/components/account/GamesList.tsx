@@ -35,7 +35,7 @@ export const GamesList = () => {
   if (error) return <div className="text-sm text-destructive">Failed to load games: {String(error)}</div>;
 
 	return (
-		<div className="grid grid-cols-2">
+		<div className="grid grid-cols-1 md:grid-cols-2">
 			{
 				games && games.length > 0 ? (
 					games.map((game: Game) => (
