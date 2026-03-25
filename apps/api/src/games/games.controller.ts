@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   Body,
   Controller,
@@ -21,35 +20,38 @@ export class GamesController {
 
   @UseGuards(BetterAuthJwtGuard)
   @Post('/create')
-  async create(@Req() req: any, @Body() body: CreateGameDto) {
+  async create(@Req() req: { user: string }, @Body() body: CreateGameDto) {
     const userId = getUserIdFromJwtPayload(req.user);
     return this.games.createGame(userId, body);
   }
 
   @UseGuards(BetterAuthJwtGuard)
   @Get()
-  async getAll(@Req() req: any) {
+  async getAll(@Req() req: { user: string }) {
     const userId = getUserIdFromJwtPayload(req.user);
     return this.games.getAll(userId);
   }
 
   @UseGuards(BetterAuthJwtGuard)
   @Post('/join')
-  async joinGame(@Req() req: any, @Body() body: JoinGameDto) {
+  async joinGame(@Req() req: { user: string }, @Body() body: JoinGameDto) {
     const userId = getUserIdFromJwtPayload(req.user);
     return this.games.joinGame(userId, body);
   }
 
   @UseGuards(BetterAuthJwtGuard)
   @Get(':gameId')
-  async getGame(@Req() req: any, @Param('gameId') gameId: string) {
+  async getGame(@Req() req: { user: string }, @Param('gameId') gameId: string) {
     const userId = getUserIdFromJwtPayload(req.user);
     return this.games.getGame(userId, gameId);
   }
 
   @UseGuards(BetterAuthJwtGuard)
   @Patch(':gameId/seen')
-  async markSeen(@Req() req: any, @Param('gameId') gameId: string) {
+  async markSeen(
+    @Req() req: { user: string },
+    @Param('gameId') gameId: string,
+  ) {
     const userId = getUserIdFromJwtPayload(req.user);
     return this.games.markSeen(userId, gameId);
   }

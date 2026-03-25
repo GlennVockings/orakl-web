@@ -1,4 +1,14 @@
-import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 
 export class CreateGameDto {
   @IsString()
@@ -9,4 +19,12 @@ export class CreateGameDto {
   @Min(1)
   @Max(100000)
   startingChips?: number;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(100)
+  @IsString({ each: true })
+  @MaxLength(50, { each: true })
+  teamNames?: string[];
 }

@@ -60,6 +60,14 @@ export class GamesService {
       const startingChips = dto.startingChips ?? 1000;
       const now = new Date();
 
+      const teamNames = (dto.teamNames ?? [])
+        .map((name) => name.trim())
+        .filter((name) => name.length > 0);
+
+      const uniqueNames = Array.from(
+        new Map(teamNames.map((name) => [name.toLowerCase(), name])).values(),
+      );
+
       try {
         const game = await this.prisma.$transaction(async (tx) => {
           const createdGame = await tx.game.create({
@@ -77,6 +85,17 @@ export class GamesService {
                   lastSeenAt: now,
                 },
               },
+              teams: uniqueNames.length
+                ? {
+                    create: uniqueNames.map((name) => ({
+                      name,
+                    })),
+                  }
+                : undefined,
+            },
+            include: {
+              members: true,
+              teams: true,
             },
           });
 
@@ -94,9 +113,8 @@ export class GamesService {
 
         return game;
       } catch (err: any) {
-        // Prisma unique constraint error
         if (err.code === 'P2002') {
-          continue; // retry with new code
+          continue;
         }
         throw err;
       }
