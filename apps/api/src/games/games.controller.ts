@@ -7,16 +7,21 @@ import {
   Get,
   Patch,
   Param,
+  Delete,
 } from '@nestjs/common';
 import { GamesService } from './games.service';
 import { CreateGameDto } from './dto/create-game.dto';
 import { BetterAuthJwtGuard } from '../auth/better-auth-jwt.guard';
 import { getUserIdFromJwtPayload } from '../auth/auth-user';
 import { JoinGameDto } from './dto/join-game.dto';
+import { GameAccessService } from './game-access.service';
 
 @Controller('games')
 export class GamesController {
-  constructor(private games: GamesService) {}
+  constructor(
+    private games: GamesService,
+    private gameAccess: GameAccessService,
+  ) {}
 
   @UseGuards(BetterAuthJwtGuard)
   @Post('/create')
@@ -54,5 +59,16 @@ export class GamesController {
   ) {
     const userId = getUserIdFromJwtPayload(req.user);
     return this.games.markSeen(userId, gameId);
+  }
+
+  @UseGuards(BetterAuthJwtGuard)
+  @Delete(':gameId')
+  async deleteGame(
+    @Req() req: { user: string },
+    @Param('gameId') gameId: string,
+  ) {
+    const userId = getUserIdFromJwtPayload(req.user);
+    await this.gameAccess.requireGameAdmin(userId, gameId);
+    return this.games.deleteGame(userId, gameId);
   }
 }

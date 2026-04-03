@@ -9,9 +9,9 @@ import {
 } from '@nestjs/common';
 import { BetterAuthJwtGuard } from '../auth/better-auth-jwt.guard';
 import { TeamsService } from './teams.service';
-import CreateTeamsDto from './dto/create-team.dto';
+import { CreateTeamsDto } from './dto/create-team.dto';
 import { getUserIdFromJwtPayload } from 'src/auth/auth-user';
-import GameAccessService from 'src/games/game-access.service';
+import { GameAccessService } from 'src/games/game-access.service';
 
 @Controller('games/:gameId/teams')
 export class TeamsController {

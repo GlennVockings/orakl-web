@@ -23,5 +23,3 @@ export class CreateTeamsDto {
   @MaxLength(20)
   color?: string;
 }
-
-export default CreateTeamsDto;

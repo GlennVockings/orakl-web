@@ -7,8 +7,9 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateGameDto } from './dto/create-game.dto';
-import { LedgerType, Prisma } from '@prisma/client';
+import { LedgerType, MemberRole, Prisma } from '@prisma/client';
 import { JoinGameDto } from './dto/join-game.dto';
+import { WsGateway } from 'src/ws/ws.gateway';
 
 function txnSign(type: LedgerType) {
   // CREDIT/PAYOUT/REFUND add, DEBIT subtract
@@ -25,7 +26,10 @@ function txnSign(type: LedgerType) {
 
 @Injectable()
 export class GamesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private wsGateway: WsGateway,
+  ) {}
 
   private generateJoinCode(length = 6): string {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -267,8 +271,20 @@ export class GamesService {
         data: { lastActivityAt: now },
       });
 
-      return { game, membership };
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+        select: { id: true, displayName: true },
+      });
+
+      return { game, membership, user };
     });
+
+    if (result.user) {
+      this.wsGateway.emitMemberJoined(game.id, {
+        userId: result.user.id,
+        displayName: result.user.displayName,
+      });
+    }
 
     return result;
   }
@@ -299,5 +315,47 @@ export class GamesService {
       throw new BadRequestException('id is incorrect or does not exist');
 
     return game;
+  }
+
+  async deleteGame(userId: string, gameId: string) {
+    const membership = await this.prisma.gameMember.findUnique({
+      where: {
+        gameId_userId: {
+          gameId,
+          userId,
+        },
+      },
+      include: {
+        game: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (!membership) {
+      throw new BadRequestException(
+        'Game does not exist or user is not a member',
+      );
+    }
+
+    if (
+      membership.role !== MemberRole.HOST &&
+      membership.role !== MemberRole.ADMIN
+    ) {
+      throw new ForbiddenException('User is not allowed to delete this game');
+    }
+
+    await this.prisma.game.delete({
+      where: { id: gameId },
+    });
+
+    return {
+      ok: true,
+      deletedGameId: gameId,
+      deletedGameName: membership.game.name,
+    };
   }
 }
