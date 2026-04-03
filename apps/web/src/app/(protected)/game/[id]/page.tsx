@@ -1,4 +1,4 @@
-import { Bet, Leaderboard, MainContent } from "@/components";
+import { GameInfo, GameRealtime, Leaderboard, MainContent, Markets } from "@/components";
 
 export default async function Game({
 	params,
@@ -8,14 +8,15 @@ export default async function Game({
 	const { id } = await params;
 
 	return (
-		<div className="grid grid-cols-4 py-3 gap-3">
+		<div className="grid grid-cols-1 lg:grid-cols-4 my-6 gap-3">
+			<GameRealtime gameId={id} />
+			<GameInfo gameId={id} />
 			<div className="flex flex-col gap-3">
-				<Bet />
 				<Leaderboard gameId={id} />
 			</div>
-			{/* <div className="col-span-3">
-				<MainContent />
-			</div> */}
+			<div className="">
+				<Markets gameId={id} />
+			</div>
 		</div>
 	)
 }

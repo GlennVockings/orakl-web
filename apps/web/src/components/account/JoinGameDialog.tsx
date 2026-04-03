@@ -33,16 +33,13 @@ export const JoinGameDialog = () => {
 	})
 
 	async function onSubmit(values: z.infer<typeof formSchema>) {
-		console.log(values)
 		const game = await apiFetch<JoinRes>("/games/join", {
 			method: "POST",
-			body: JSON.stringify({ ...values })
+			body: JSON.stringify({ joinCode: values.joinCode.toUpperCase()})
 		})
 
-		const gameId = game?.game.id;
-
-		if (gameId) {
-			router.push(`/game/${gameId}`)
+		if (game?.game.id) {
+			router.push(`/game/${game?.game.id}`)
 			router.refresh();
 		}
 	}

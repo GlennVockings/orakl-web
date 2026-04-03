@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { SiteHeader, ThemeProvider, Footer, SessionProvider } from "@/components";
 import { getSession } from "@/lib/server/get-session";
+import { Toaster } from "sonner";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -46,6 +47,7 @@ export default function RootLayout({
             <Footer />
           </ThemeProvider>
         </SessionProvider>
+        <Toaster position={"top-center"} theme="dark" />
       </body>
     </html>
   );

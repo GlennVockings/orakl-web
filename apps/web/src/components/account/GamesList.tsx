@@ -2,43 +2,31 @@
 
 import { Button } from "../ui/button";
 import { BadgeAlert, Info, Trash2 } from "lucide-react";
-import { apiFetch } from "@/lib/api";
-import useSWR from 'swr'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import Link from "next/link";
-
-interface Game {
-	id: string;
-	name: string;
-	status: string;
-	joinCode: string;
-	startingChips: number;
-	lastActivityAt: Date;
-	leaderboard: [{
-		balance: number;
-		displayName: string;
-	}];
-	myMembership: {
-		balance: number;
-		hasUpdates: boolean;
-	}
-}
-
-const fetcher = () => apiFetch<Game[]>("/games", { method: "GET" });
+import { GameSummary } from "@/lib/types";
+import { useGames } from "@/hooks/use-games";
+import { apiFetch } from "@/lib/api";
 
 export const GamesList = () => {
-	const { data: games, error, isLoading } = useSWR("games", fetcher, {
-    revalidateOnFocus: false,
-  });
+	const { games, error, isLoading, mutate } = useGames();
+
+	async function deleteGame(id: string) {
+		await apiFetch(`/games/${id}`, {
+			method: "DELETE",
+		})
+		await mutate();
+	}
 
   if (isLoading) return <div>Loading games…</div>;
+
   if (error) return <div className="text-sm text-destructive">Failed to load games: {String(error)}</div>;
 
 	return (
-		<div className="grid grid-cols-1 md:grid-cols-2">
+		<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 			{
 				games && games.length > 0 ? (
-					games.map((game: Game) => (
+					games.map((game: GameSummary) => (
 						<Card key={game.id} className="relative">
 							<CardHeader>
 								<CardTitle>{ game.name }</CardTitle>
@@ -60,7 +48,7 @@ export const GamesList = () => {
 								<Button asChild>
 									<Link href={`/game/${game.id}`}>Open</Link>
 								</Button>
-								<Button variant={"destructive"} size={"icon"}><Trash2 /></Button>
+								<Button variant={"destructive"} size={"icon"} onClick={() => deleteGame(game.id)}><Trash2 /></Button>
 							</CardFooter>
 						</Card>
 					))
