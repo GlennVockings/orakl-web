@@ -4,8 +4,6 @@ import useSWR from "swr";
 import { apiFetch } from "@/lib/api";
 import { GameSummary } from "@/lib/types";
 
-
-
 const fetchGames = () =>
   apiFetch<GameSummary[]>("/games", {
     method: "GET",

@@ -14,7 +14,8 @@ export default async function Game({
 			<div className="flex flex-col gap-3">
 				<Leaderboard gameId={id} />
 			</div>
-			<div className="">
+			<div className="flex flex-col gap-4">
+				<p className="font-[Space_Grotesk] uppercase text-lg">Markets</p>
 				<Markets gameId={id} />
 			</div>
 		</div>

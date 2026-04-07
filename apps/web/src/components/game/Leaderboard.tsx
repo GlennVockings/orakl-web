@@ -2,7 +2,7 @@
 
 import useSWR from "swr";
 import { ScrollArea } from "../ui/scroll-area"
-import { ChevronDown } from "lucide-react"
+import { ChevronDown, User } from "lucide-react"
 import { apiFetch } from "@/lib/api"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { LeaderboardEntry } from "@/lib/types";
@@ -39,37 +39,44 @@ export const Leaderboard = ({ gameId } : { gameId: string }) => {
 				</TabsList>
 				<TabsContent value="settledBalance">
 					<ScrollArea className="max-h-[500px] w-full rounded-md">
-						{
-							leaderboard?.map((entry) => (
-								<div key={entry.userId} className="bg-accent flex items-center p-4 rounded-md">
-									<div className="font-[Space_Grotesk] pr-6">
-										<p>{ String(entry.rank).padStart(2, "0") }</p>
+						<div className="flex flex-col gap-2">
+							{
+								leaderboard?.map((entry) => (
+									<div key={entry.userId} className="bg-accent flex items-center p-4 rounded-md">
+										<div className="font-[Space_Grotesk] pr-5">
+											<p className="text-2xl">{ String(entry.rank).padStart(2, "0") }</p>
+										</div>
+										<div className="flex-grow text-white font-bold">
+											<p>{ entry.displayName }</p>
+										</div>
+										<div className="text-primary font-bold">
+											<p>{ entry.settledBalance }</p>
+										</div>
 									</div>
-									<div className="flex-grow text-white font-bold">
-										<p>{ entry.displayName }</p>
-									</div>
-									<div className="text-primary font-bold">
-										<p>{ entry.settledBalance }</p>
-									</div>
-								</div>
-							))
-						}
+								))
+							}
+						</div>
 					</ScrollArea>
 				</TabsContent>
 				<TabsContent value="currentBalance">
 					<ScrollArea className="max-h-[500px] w-full rounded-md">
-						{
-							leaderboard?.map((entry) => (
-								<div key={entry.userId} className="bg-background flex items-center p-4 rounded-md">
-									<div className="flex-grow text-white font-bold">
-										<p>{ entry.displayName }</p>
+						<div className="flex flex-col gap-2">
+							{
+								leaderboard?.map((entry) => (
+									<div key={entry.userId} className="bg-accent flex items-center p-4 rounded-md">
+										<div className="font-[Space_Grotesk] pr-6">
+											<User />
+										</div>
+										<div className="flex-grow text-white font-bold">
+											<p>{ entry.displayName }</p>
+										</div>
+										<div className="text-primary font-bold">
+											<p>{ entry.currentBalance }</p>
+										</div>
 									</div>
-									<div className="text-primary font-bold">
-										<p>{ entry.currentBalance }</p>
-									</div>
-								</div>
-							))
-						}
+								))
+							}
+						</div>
 					</ScrollArea>
 				</TabsContent>
 			</Tabs>

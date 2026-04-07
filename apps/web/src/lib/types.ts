@@ -1,20 +1,20 @@
-enum MarketStatus {
-	OPEN,
-	CLOSED,
-	SETTLED
+export enum MarketStatus {
+	OPEN = "OPEN",
+	CLOSED = "CLOSED",
+	SETTLED = "SETTLED"
 }
 
-enum SelectionStatus {
-	ACTIVE,
-	WINNER,
-	LOSER
+export enum SelectionStatus {
+	ACTIVE = "ACTIVE",
+	WINNER = "WINNER",
+	LOSER = "LOSER"
 }
 
 enum BetStatus {
-	PENDING,
-	WON,
-	LOST,
-	VOID
+	PENDING = "PENDING",
+	WON = "WON",
+	LOST = "LOST",
+	VOID = "VOID"
 }
 
 export interface Game {
