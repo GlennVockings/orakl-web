@@ -11,7 +11,7 @@ import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
   cors: {
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000', 'http://192.168.1.243:3000'],
     credentials: true,
   },
 })
@@ -42,6 +42,22 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     this.server.to(`game:${gameId}`).emit('game.member_joined', {
       gameId,
+      ...payload,
+    });
+  }
+
+  emitMarketCreated(gameId: string, payload: { name: string }) {
+    this.server.to(`game:${gameId}`).emit('game.market_created', {
+      gameId,
+      ...payload,
+    });
+  }
+
+  emitTeamCreated(
+    gameId: string,
+    payload: { createdCount: number; names: string[] },
+  ) {
+    this.server.to(`game:${gameId}`).emit('game.team_created', {
       ...payload,
     });
   }

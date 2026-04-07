@@ -1,10 +1,14 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { CreateTeamsDto } from './dto/create-team.dto';
+import { WsGateway } from 'src/ws/ws.gateway';
 
 @Injectable()
 export class TeamsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private wsGateway: WsGateway,
+  ) {}
 
   async createTeams(gameId: string, dto: CreateTeamsDto) {
     const game = await this.prisma.game.findUnique({
@@ -41,6 +45,11 @@ export class TeamsService {
     } catch {
       throw new BadRequestException('Failed to create teams');
     }
+
+    this.wsGateway.emitTeamCreated(gameId, {
+      createdCount: names.length,
+      names,
+    });
 
     return this.prisma.team.findMany({
       where: { gameId },

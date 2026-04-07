@@ -2,10 +2,14 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateMarketDto } from './dto/create-market.dto';
 import { Prisma } from '@prisma/client';
+import { WsGateway } from 'src/ws/ws.gateway';
 
 @Injectable()
 export class MarketsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private wsGateway: WsGateway,
+  ) {}
 
   async createMarket(gameId: string, dto: CreateMarketDto) {
     const game = await this.prisma.game.findUnique({
@@ -107,6 +111,10 @@ export class MarketsService {
         data: {
           lastActivityAt: now,
         },
+      });
+
+      this.wsGateway.emitMarketCreated(gameId, {
+        name: market.name,
       });
 
       return market;
