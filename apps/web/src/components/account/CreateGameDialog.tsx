@@ -50,17 +50,19 @@ export const CreateGameDialog = () => {
   })
 
 	async function onSubmit(values: z.infer<typeof formSchema>) {
+		const payload = {
+			name: values.name,
+			startingChips: values.startingChips,
+			teamNames: values.teams
+				.map((t) => t.team.trim())
+				.filter(Boolean),
+		};
 		await apiFetch<Game>("/games/create", {
 			method: "POST",
-			body: JSON.stringify({ ...values })
-		}).then((res) => {
+			body: JSON.stringify({ ...payload })
+		})
+		.then((res) => {
 			setOpen(false)
-			toast(`${res?.name} has been created`, {
-				action: {
-					label: "Open",
-					onClick: () => window.location.assign(`/game/${res?.id}`)
-				}
-			})
 		})
 		await mutate();
 	}

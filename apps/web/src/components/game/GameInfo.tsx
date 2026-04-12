@@ -1,57 +1,36 @@
 "use client"
 
-import { apiFetch } from "@/lib/api";
-import { Game } from "@/lib/types";
-import useSWR from "swr";
-import { Badge } from "../ui/badge";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
-import { Button } from "../ui/button";
-import { Settings } from "lucide-react";
-
-const fetcher = (gameId: string) =>
-	apiFetch<Game>(`/games/${gameId}`, {
-		method: "GET",
-	})
+import { useGameMe, useInfo } from "@/hooks";
+import { Spinner } from "../ui/spinner";
 
 export const GameInfo = ({ gameId } : { gameId: string }) => {
-	const { data, error, isLoading } = useSWR(
-		["game", gameId],
-		([, id]) => fetcher(id),
-		{
-			revalidateOnFocus: false,
-		}
-	);
+	const { game, error, isLoading } = useInfo(gameId);
+	const { gameMe } = useGameMe(gameId);
 
 	if (isLoading) {
-		return <div className="p-2">Loading leaderboard...</div>;
+		return <div className="p-2"><Spinner /> Loading game info...</div>;
 	}
 
 	if (error) {
-		return <div className="p-2">Failed to load leaderboard.</div>;
+		return <div className="p-2">Failed to load game info.</div>;
 	}
 
 	return (
-		<div className="mb-4 flex justify-between">
-			<div>
-				<p className="font-[Space_Grotesk] uppercase text-3xl text-white">{data?.name}</p>
-				<p>Join Code: { data?.joinCode }</p>
+		<div className="flex flex-col gap-4">
+			<div className="flex flex-col gap-1">
+				<p className="font-[Space_Grotesk] uppercase text-4xl text-white">{game?.name}</p>
+				<p>Join Code: { game?.joinCode }</p>
 			</div>
-			<Dialog>
-				<DialogTrigger asChild>
-					<Button variant={"default"} size={"icon-lg"}>
-						<Settings />
-					</Button>
-				</DialogTrigger>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>Settings</DialogTitle>
-						<DialogDescription>Controls for admins</DialogDescription>
-					</DialogHeader>
-					<Button>
-						Add Team
-					</Button>
-				</DialogContent>
-			</Dialog>
+			<div className="flex gap-4">
+				<div className="bg-muted p-4 border-l-2 border-primary rounded-md flex-grow text-lg font-[Space_Grotesk] uppercase tracking-wide max-w-1/2">
+					<p className="text-sm">Leaderboard:</p>
+					<p className="text-2xl text-primary">#4</p>
+				</div>
+				<div className="bg-muted p-4 border-l-2 border-primary rounded-md flex-grow text-lg font-[Space_Grotesk] uppercase tracking-wide">
+					<p className="text-sm">Budget:</p>
+					<p className="text-2xl text-primary">{ gameMe?.currentBalance }</p>
+				</div>
+			</div>
 		</div>
 	)
 }

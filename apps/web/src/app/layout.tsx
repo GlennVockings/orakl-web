@@ -41,7 +41,7 @@ export default function RootLayout({
           disableTransitionOnChange
           >
             <SiteHeader />
-            <div className="mx-auto max-w-sm min-h-lvh lg:max-w-6xl bg-background">
+            <div className="mx-auto max-w-xs md:max-w-xl min-h-lvh lg:max-w-4xl bg-background">
               {children}
             </div>
             <Footer />

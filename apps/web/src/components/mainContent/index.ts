@@ -1,5 +1,0 @@
-export * from "./Bets"
-export * from "./Event"
-export * from "./MainContent"
-export * from "./NewLookMarket"
-export * from "./Teams"

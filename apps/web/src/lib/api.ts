@@ -18,7 +18,6 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}) {
   });
 
   if (!res.ok) {
-    // optionally: if 401, clear cache and retry once
     return null;
   }
 

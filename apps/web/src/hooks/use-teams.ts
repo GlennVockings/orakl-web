@@ -21,7 +21,7 @@ export function useTeams(gameId: string) {
   return {
     teams: data ?? [],
     error,
-    isLoading,
+    teamsLoading: isLoading,
     mutate,
   };
 }

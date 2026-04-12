@@ -1,4 +1,7 @@
-import { GameInfo, GameRealtime, Leaderboard, MainContent, Markets } from "@/components";
+import { BetsList, GameInfo, GameRealtime, Leaderboard, Markets, MarkSeen, Teams } from "@/components";
+import { Button } from "@/components/ui/button";
+import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
 
 export default async function Game({
 	params,
@@ -8,15 +11,29 @@ export default async function Game({
 	const { id } = await params;
 
 	return (
-		<div className="grid grid-cols-1 lg:grid-cols-4 my-6 gap-3">
-			<GameRealtime gameId={id} />
-			<GameInfo gameId={id} />
-			<div className="flex flex-col gap-3">
-				<Leaderboard gameId={id} />
+		<div className="grid grid-cols-1 lg:grid-cols-3 mb-6 mt-2 gap-4">
+			<div className="lg:col-span-3 flex flex-col gap-2">
+				<Link href={"/account"} className="text-sm flex gap-1 items-center">
+					<ChevronLeft size={18} />
+					<p>Back to games</p>
+				</Link>
+				<GameRealtime gameId={id} />
+				<MarkSeen gameId={id} />
+				<GameInfo gameId={id} />
 			</div>
-			<div className="flex flex-col gap-4">
-				<p className="font-[Space_Grotesk] uppercase text-lg">Markets</p>
-				<Markets gameId={id} />
+			<div className="flex justify-between md:flex-col gap-4">
+				<Leaderboard gameId={id} />
+				<Teams gameId={id} />
+			</div>
+			<div className="flex flex-col gap-4 lg:col-span-2">
+				<div>
+					<p className="font-[Space_Grotesk] uppercase text-2xl">Markets</p>
+					<Markets gameId={id} />
+				</div>
+				<div>
+					<p className="font-[Space_Grotesk] uppercase">Bet History</p>
+					<BetsList gameId={id} />
+				</div>
 			</div>
 		</div>
 	)

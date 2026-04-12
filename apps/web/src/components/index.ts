@@ -1,5 +1,4 @@
 export * from "./header"
-export * from "./mainContent"
 export * from "./Footer"
 export * from "./providers"
 export * from "./Step"

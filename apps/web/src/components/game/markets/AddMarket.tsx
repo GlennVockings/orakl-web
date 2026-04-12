@@ -6,16 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 import { Label } from "@/components/ui/label";
 import { apiFetch } from "@/lib/api";
-
-type Team = {
-  id: string;
-  name: string;
-};
+import { Team } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 const formSchema = z
   .object({
@@ -23,89 +20,140 @@ const formSchema = z
       message: "Name must be at least 5 characters",
     }),
     selectionType: z.enum(["teams", "labels"]),
-    teamIds: z.array(z.string()),
-    labels: z
-      .array(
-        z.object({
-          value: z.string().trim(),
-        }),
-      ),
+    teamSelections: z.array(
+      z.object({
+        teamId: z.string(),
+        selected: z.boolean(),
+        decimalOdds: z.coerce.number().gt(1, "Odds must be greater than 1"),
+      }),
+    ),
+    labelSelections: z.array(
+      z.object({
+        label: z.string().trim(),
+        decimalOdds: z.coerce.number().gt(1, "Odds must be greater than 1"),
+      }),
+    ),
   })
   .superRefine((values, ctx) => {
-    if (values.selectionType === "teams" && values.teamIds?.length === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["teamIds"],
-        message: "Select at least one team",
-      });
+    if (values.selectionType === "teams") {
+      const selectedTeams = values.teamSelections.filter((team) => team.selected);
+
+      if (selectedTeams.length === 0) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["teamSelections"],
+          message: "Select at least one team",
+        });
+      }
     }
 
     if (values.selectionType === "labels") {
-      if (values.labels?.length === 0) {
+      const validLabels = values.labelSelections.filter(
+        (label) => label.label.trim().length > 0,
+      );
+
+      if (validLabels.length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["labels"],
+          path: ["labelSelections"],
           message: "Add at least one label",
         });
       }
 
-      const normalized = values.labels
-        .map((label) => label.value.trim().toLowerCase())
-        .filter(Boolean);
+      const normalized = validLabels.map((label) =>
+        label.label.trim().toLowerCase(),
+      );
 
       if (new Set(normalized).size !== normalized.length) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          path: ["labels"],
+          path: ["labelSelections"],
           message: "Labels must be unique",
         });
       }
     }
   });
 
-export const AddMarket = ({ teams, gameId } : { teams: Team[], gameId: string }) => {
+type AddMarketFormValues = z.infer<typeof formSchema>;
+
+export const AddMarket = ({
+  teams,
+  gameId,
+  isAdmin
+}: {
+  teams: Team[];
+  gameId: string;
+  isAdmin: boolean;
+}) => {
   const [isForm, setIsForm] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<AddMarketFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      selectionType: "teams",
-      teamIds: [],
-      labels: [{ value: "" }, { value: "" }],
+      selectionType: teams.length > 0 ? "teams" : "labels",
+      teamSelections: teams.map((team) => ({
+        teamId: team.id,
+        selected: false,
+        decimalOdds: 2,
+      })),
+      labelSelections: [
+        { label: "", decimalOdds: 2 },
+        { label: "", decimalOdds: 2 },
+      ],
     },
   });
 
-  const { fields, append, remove, replace } = useFieldArray({
+  const {
+    fields: labelFields,
+    append,
+    remove,
+    replace,
+  } = useFieldArray({
     control: form.control,
-    name: "labels",
+    name: "labelSelections",
   });
 
   const selectionType = form.watch("selectionType");
-  const selectedTeamIds = form.watch("teamIds");
+  const teamSelections = form.watch("teamSelections");
+
+  useEffect(() => {
+    form.setValue(
+      "teamSelections",
+      teams.map((team) => ({
+        teamId: team.id,
+        selected: false,
+        decimalOdds: 2,
+      })),
+    );
+  }, [teams, form]);
 
   const allSelected =
-    teams.length > 0 && selectedTeamIds.length === teams.length;
+    teams.length > 0 &&
+    teamSelections.length > 0 &&
+    teamSelections.every((team) => team.selected);
 
   const toggleTeam = (teamId: string, checked: boolean) => {
-    const current = form.getValues("teamIds");
-
-    if (checked) {
-      form.setValue("teamIds", [...current, teamId], { shouldValidate: true });
-      return;
-    }
+    const current = form.getValues("teamSelections");
 
     form.setValue(
-      "teamIds",
-      current.filter((id) => id !== teamId),
+      "teamSelections",
+      current.map((team) =>
+        team.teamId === teamId ? { ...team, selected: checked } : team,
+      ),
       { shouldValidate: true },
     );
   };
 
   const toggleSelectAllTeams = (checked: boolean) => {
+    const current = form.getValues("teamSelections");
+
     form.setValue(
-      "teamIds",
-      checked ? teams.map((team) => team.id) : [],
+      "teamSelections",
+      current.map((team) => ({
+        ...team,
+        selected: checked,
+      })),
       { shouldValidate: true },
     );
   };
@@ -114,39 +162,68 @@ export const AddMarket = ({ teams, gameId } : { teams: Team[], gameId: string })
     form.setValue("selectionType", type, { shouldValidate: true });
 
     if (type === "teams") {
-      replace([{ value: "" }, { value: "" }]);
+      replace([
+        { label: "", decimalOdds: 2 },
+        { label: "", decimalOdds: 2 },
+      ]);
     } else {
-      form.setValue("teamIds", [], { shouldValidate: true });
+      form.setValue(
+        "teamSelections",
+        form.getValues("teamSelections").map((team) => ({
+          ...team,
+          selected: false,
+        })),
+        { shouldValidate: true },
+      );
     }
   };
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: AddMarketFormValues) {
     const payload =
       values.selectionType === "teams"
         ? {
             name: values.name,
-            teamSelections: values.teamIds.map((teamId) => ({
-              teamId,
-            })),
+            teamSelections: values.teamSelections
+              .filter((team) => team.selected)
+              .map((team) => ({
+                teamId: team.teamId,
+                decimalOdds: team.decimalOdds,
+              })),
           }
         : {
             name: values.name,
-            labelSelections: values.labels
-              .map((label) => label.value.trim())
-              .filter(Boolean)
+            labelSelections: values.labelSelections
+              .filter((label) => label.label.trim().length > 0)
               .map((label) => ({
-                label,
+                label: label.label.trim(),
+                decimalOdds: label.decimalOdds,
               })),
           };
 
     await apiFetch(`/games/${gameId}/markets`, {
-      method: "GET",
-      body: JSON.stringify({ ...payload })
-    })
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+
+    form.reset({
+      name: "",
+      selectionType: teams.length > 0 ? "teams" : "labels",
+      teamSelections: teams.map((team) => ({
+        teamId: team.id,
+        selected: false,
+        decimalOdds: 2,
+      })),
+      labelSelections: [
+        { label: "", decimalOdds: 2 },
+        { label: "", decimalOdds: 2 },
+      ],
+    });
+
+    setIsForm(false);
   }
 
   return (
-    <div className="bg-muted border-dashed border-4 rounded-md border-accent flex justify-center items-center py-6">
+    <div className={cn("bg-muted border-dashed border-4 rounded-md border-accent flex justify-center items-center py-6", isAdmin ? "" : "hidden")}>
       {!isForm && (
         <Button size="icon-lg" variant="ghost" onClick={() => setIsForm(true)}>
           <Plus />
@@ -154,12 +231,12 @@ export const AddMarket = ({ teams, gameId } : { teams: Team[], gameId: string })
       )}
 
       {isForm && (
-        <form onSubmit={form.handleSubmit(
-					onSubmit,
-					(errors) => {
-						console.log("FORM ERRORS", errors);
-					}
-				)} className="w-full max-w-xl space-y-4 px-4">
+        <form
+          onSubmit={form.handleSubmit(onSubmit, (errors) => {
+            console.log("FORM ERRORS", errors);
+          })}
+          className="w-full max-w-xl space-y-4 px-4"
+        >
           <FieldGroup>
             <Controller
               control={form.control}
@@ -200,7 +277,7 @@ export const AddMarket = ({ teams, gameId } : { teams: Team[], gameId: string })
             </Field>
 
             {selectionType === "teams" && (
-              <Field data-invalid={!!form.formState.errors.teamIds}>
+              <Field data-invalid={!!form.formState.errors.teamSelections}>
                 <FieldLabel>Teams</FieldLabel>
 
                 <div className="space-y-3 rounded-md border p-3">
@@ -208,49 +285,76 @@ export const AddMarket = ({ teams, gameId } : { teams: Team[], gameId: string })
                     <Checkbox
                       id="select-all-teams"
                       checked={allSelected}
-                      onCheckedChange={(checked) => toggleSelectAllTeams(Boolean(checked))}
+                      onCheckedChange={(checked) =>
+                        toggleSelectAllTeams(Boolean(checked))
+                      }
                     />
                     <Label htmlFor="select-all-teams" className="text-sm font-medium">
                       Select all
                     </Label>
                   </div>
 
-                  <div className="grid gap-2">
-                    {teams.map((team) => {
-                      const checked = selectedTeamIds.includes(team.id);
+                  <div className="grid gap-3">
+                    {teams.map((team, index) => {
+                      const selection = teamSelections[index];
+                      const checked = selection?.selected ?? false;
 
                       return (
-                        <div key={team.id} className="flex items-center gap-2">
+                        <div
+                          key={team.id}
+                          className="grid grid-cols-[auto_1fr_120px] items-center gap-3"
+                        >
                           <Checkbox
                             id={team.id}
                             checked={checked}
-                            onCheckedChange={(value) => toggleTeam(team.id, Boolean(value))}
+                            onCheckedChange={(value) =>
+                              toggleTeam(team.id, Boolean(value))
+                            }
                           />
+
                           <Label htmlFor={team.id} className="text-sm">
                             {team.name}
                           </Label>
+
+                          <Controller
+                            control={form.control}
+                            name={`teamSelections.${index}.decimalOdds`}
+                            render={({ field }) => (
+                              <Input
+                                {...field}
+                                type="number"
+                                step="0.01"
+                                min="1.01"
+                                disabled={!checked}
+                                placeholder="2.00"
+                              />
+                            )}
+                          />
                         </div>
                       );
                     })}
                   </div>
                 </div>
 
-                {form.formState.errors.teamIds && (
-                  <FieldError errors={[form.formState.errors.teamIds]} />
+                {form.formState.errors.teamSelections && (
+                  <FieldError errors={[form.formState.errors.teamSelections]} />
                 )}
               </Field>
             )}
 
             {selectionType === "labels" && (
-              <Field data-invalid={!!form.formState.errors.labels}>
+              <Field data-invalid={!!form.formState.errors.labelSelections}>
                 <FieldLabel>Labels</FieldLabel>
 
                 <div className="space-y-2 rounded-md border p-3">
-                  {fields.map((labelField, index) => (
-                    <div key={labelField.id} className="flex items-center gap-2">
+                  {labelFields.map((labelField, index) => (
+                    <div
+                      key={labelField.id}
+                      className="grid grid-cols-[1fr_120px_auto] items-center gap-2"
+                    >
                       <Controller
                         control={form.control}
-                        name={`labels.${index}.value`}
+                        name={`labelSelections.${index}.label`}
                         render={({ field }) => (
                           <Input
                             {...field}
@@ -259,7 +363,21 @@ export const AddMarket = ({ teams, gameId } : { teams: Team[], gameId: string })
                         )}
                       />
 
-                      {fields.length > 2 && (
+                      <Controller
+                        control={form.control}
+                        name={`labelSelections.${index}.decimalOdds`}
+                        render={({ field }) => (
+                          <Input
+                            {...field}
+                            type="number"
+                            step="0.01"
+                            min="1.01"
+                            placeholder="2.00"
+                          />
+                        )}
+                      />
+
+                      {labelFields.length > 2 && (
                         <Button
                           type="button"
                           variant="destructive"
@@ -275,21 +393,25 @@ export const AddMarket = ({ teams, gameId } : { teams: Team[], gameId: string })
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => append({ value: "" })}
+                    onClick={() => append({ label: "", decimalOdds: 2 })}
                   >
                     Add label
                   </Button>
                 </div>
 
-                {form.formState.errors.labels && (
-                  <FieldError errors={[form.formState.errors.labels]} />
+                {form.formState.errors.labelSelections && (
+                  <FieldError errors={[form.formState.errors.labelSelections]} />
                 )}
               </Field>
             )}
           </FieldGroup>
 
           <div className="flex gap-2 py-4">
-            <Button type="button" variant="outline" onClick={() => setIsForm(false)}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setIsForm(false)}
+            >
               Cancel
             </Button>
             <Button type="submit">Create Market</Button>

@@ -1,45 +1,46 @@
 "use client"
 
-import { useState } from "react";
-import { Selection, SelectionStatus, Team } from "@/lib/types";
 import { Badge } from "../../ui/badge";
 import { SelectionForm } from "./SelectionForm";
 import { AddMarket } from "./AddMarket";
-import { useMarkets } from "@/hooks";
+import { useGameMe, useMarkets, useTeams } from "@/hooks";
 import { Info } from "lucide-react";
-
-const selections: Selection[] = [
-	{
-		id: "1",
-		label: "yes",
-		decimalOdds: 1.25,
-		status: SelectionStatus.ACTIVE,
-	},
-	{
-		id: "2",
-		label: "no",
-		decimalOdds: 1.25,
-		status: SelectionStatus.ACTIVE,
-	}
-]
-
-const demoTeams: Team[] = [
-	{ id: "t1", name: "Red" },
-	{ id: "t2", name: "Blue" },
-	{ id: "t3", name: "Green" },
-	{ id: "t4", name: "Yellow" },
-];
+import { Spinner } from "@/components/ui/spinner";
+import { Drawer } from "@/components/ui/drawer";
 
 export const Markets = ({ gameId } : { gameId: string }) => {
 	const { markets, error, isLoading } = useMarkets(gameId);
+	const { teams, teamsLoading } = useTeams(gameId);
+	const { gameMe } = useGameMe(gameId);
 
-  if (isLoading) {
-    return <div className="p-2">Loading markets...</div>;
+  if (isLoading || teamsLoading) {
+    return <div className="p-2"><Spinner /> Loading markets...</div>;
   }
 
   if (error) {
     return <div className="p-2">Failed to load markets.</div>;
   }
+
+	function renderBadge(status: string) {
+		switch (status) {
+			case "OPEN":
+				return (
+					<Badge variant={"open"}>{ status }</Badge>
+				)
+			case "CLOSED":
+				return (
+					<Badge variant={"closed"}>{ status }</Badge>
+				)
+			case "SETTLED":
+				return (
+					<Badge variant={"closed"}>{ status }</Badge>
+				)
+			default:
+				return (
+					<Badge variant={"closed"}>{ status }</Badge>
+				)
+		}
+	}
 
 	if (markets && markets?.length < 1) {
 		return (
@@ -52,26 +53,24 @@ export const Markets = ({ gameId } : { gameId: string }) => {
 						</p>
 					</div>
 				</div>
-				<AddMarket teams={demoTeams} gameId={gameId} />
+				<AddMarket teams={teams} gameId={gameId} isAdmin={gameMe?.isAdmin || false} />
 			</div>
 		)
 	}
 
 	return (
 		<div className="flex flex-col gap-4">
-			<AddMarket teams={demoTeams} gameId={gameId} />
+			<AddMarket teams={teams} gameId={gameId} isAdmin={gameMe?.isAdmin || false} />
 			{
 				markets?.map((market) => (
 					<div key={market.id}>
-						<div className="bg-muted border-2 border-accent p-4">
+						<div className="bg-muted border-2 border-accent p-4 flex flex-col gap-4">
 							<div className="flex justify-end">
-								{/* <Badge variant={"open"}>open</Badge> */}
-								{/* <Badge variant={"closed"}>closed</Badge> */}
-								<Badge variant={"settled"}>settled</Badge>
+								{ renderBadge(market.status) }
 							</div>
 							<div className="flex flex-col gap-4">
 								<p className="font-[Space_Grotesk] uppercase text-2xl">{ market.name }</p>
-								<SelectionForm selections={selections} />
+								<SelectionForm selections={market.selections} market={market} gameId={gameId} />
 							</div>
 						</div>
 					</div>

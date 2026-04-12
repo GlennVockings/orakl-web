@@ -17,6 +17,11 @@ enum BetStatus {
 	VOID = "VOID"
 }
 
+export interface User {
+	id: string;
+	displayName: string;
+}
+
 export interface Game {
 	id: string;
 	name: string;
@@ -94,4 +99,29 @@ export interface GameSummary {
     hasUpdates: boolean;
   };
   leaderboard: GameLeaderboardRow[];
+}
+
+export interface GameMe {
+  userId: string;
+  role: "HOST" | "ADMIN" | "PLAYER";
+  isAdmin: boolean;
+  currentBalance: number;
+  settledBalance: number;
+  lastSeenAt: string;
+  hasUpdates: boolean;
+}
+
+export interface PlaceBet {
+	gameId: string;
+	marketId: string;
+	selectionId: string;
+	stake: number;
+}
+
+export interface BetList extends Bet {
+	market: Market;
+	selection: Selection;
+	winningSelection: Selection;
+	isSettled: boolean;
+	user?: User;
 }
