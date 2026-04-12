@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -12,6 +13,7 @@ import { TeamsService } from './teams.service';
 import { CreateTeamsDto } from './dto/create-team.dto';
 import { getUserIdFromJwtPayload } from 'src/auth/auth-user';
 import { GameAccessService } from 'src/games/game-access.service';
+import { EditTeamsDto } from './dto/edit-team.dto';
 
 @Controller('games/:gameId/teams')
 export class TeamsController {
@@ -41,5 +43,17 @@ export class TeamsController {
     const userId = getUserIdFromJwtPayload(req.user);
     await this.gameAccess.requireGameMember(userId, gameId);
     return this.teams.getTeams(gameId);
+  }
+
+  @UseGuards(BetterAuthJwtGuard)
+  @Patch()
+  async editTeam(
+    @Req() req: { user: string },
+    @Param('gameId') gameId: string,
+    @Body() body: EditTeamsDto,
+  ) {
+    const userId = getUserIdFromJwtPayload(req.user);
+    await this.gameAccess.requireGameAdmin(userId, gameId);
+    return this.teams.editTeam(gameId, body);
   }
 }

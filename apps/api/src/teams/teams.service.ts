@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { CreateTeamsDto } from './dto/create-team.dto';
 import { WsGateway } from 'src/ws/ws.gateway';
+import { EditTeamsDto } from './dto/edit-team.dto';
 
 @Injectable()
 export class TeamsService {
@@ -71,5 +72,21 @@ export class TeamsService {
       where: { gameId },
       orderBy: { name: 'asc' },
     });
+  }
+
+  async editTeam(gameId: string, dto: EditTeamsDto) {
+    const team = await this.prisma.team.update({
+      where: {
+        gameId_name: {
+          gameId,
+          name: dto.oldName,
+        },
+      },
+      data: {
+        name: dto.newName,
+      },
+    });
+
+    return team;
   }
 }

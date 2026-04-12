@@ -358,4 +358,80 @@ export class GamesService {
       deletedGameName: membership.game.name,
     };
   }
+
+  async getMe(userId: string, gameId: string) {
+    const membership = await this.prisma.gameMember.findUnique({
+      where: {
+        gameId_userId: {
+          gameId,
+          userId,
+        },
+      },
+      include: {
+        game: {
+          select: {
+            id: true,
+            createdAt: true,
+            lastActivityAt: true,
+            startingChips: true,
+          },
+        },
+      },
+    });
+
+    if (!membership) {
+      throw new BadRequestException(
+        'Game does not exist or user is not a member',
+      );
+    }
+
+    const txns = await this.prisma.gameLedgerTxn.findMany({
+      where: {
+        gameId,
+        userId,
+      },
+      select: {
+        type: true,
+        amount: true,
+        marketId: true,
+      },
+    });
+
+    const currentBalance = txns.reduce((sum, txn) => {
+      const sign = txn.type === 'DEBIT' ? -1 : 1;
+
+      return sum + Number(txn.amount) * sign;
+    }, 0);
+
+    const settledMarkets = await this.prisma.market.findMany({
+      where: {
+        gameId,
+        status: 'SETTLED',
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    const settledMarketIds = new Set(settledMarkets.map((m) => m.id));
+
+    const settledBalance = txns.reduce((sum, txn) => {
+      const shouldInclude = !txn.marketId || settledMarketIds.has(txn.marketId);
+      if (!shouldInclude) return sum;
+
+      const sign = txn.type === 'DEBIT' ? -1 : 1;
+
+      return sum + Number(txn.amount) * sign;
+    }, 0);
+
+    return {
+      userId,
+      role: membership.role,
+      isAdmin: membership.role === 'ADMIN' || membership.role === 'HOST',
+      currentBalance,
+      settledBalance,
+      lastSeenAt: membership.lastSeenAt,
+      hasUpdates: membership.game.lastActivityAt > membership.lastSeenAt,
+    };
+  }
 }

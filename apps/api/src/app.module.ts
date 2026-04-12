@@ -7,6 +7,7 @@ import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { TeamsModule } from './teams/teams.module';
 import { MarketsModule } from './markets/markets.module';
 import { WsModule } from './ws/ws.module';
+import { BetsModule } from './bets/bets.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { WsModule } from './ws/ws.module';
     LeaderboardModule,
     TeamsModule,
     MarketsModule,
+    BetsModule,
     WsModule,
   ],
   controllers: [AppController],

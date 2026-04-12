@@ -71,4 +71,11 @@ export class GamesController {
     await this.gameAccess.requireGameAdmin(userId, gameId);
     return this.games.deleteGame(userId, gameId);
   }
+
+  @UseGuards(BetterAuthJwtGuard)
+  @Get(':gameId/me')
+  async getMe(@Req() req: { user: string }, @Param('gameId') gameId: string) {
+    const userId = getUserIdFromJwtPayload(req.user);
+    return this.games.getMe(userId, gameId);
+  }
 }
