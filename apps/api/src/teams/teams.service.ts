@@ -77,10 +77,8 @@ export class TeamsService {
   async editTeam(gameId: string, dto: EditTeamsDto) {
     const team = await this.prisma.team.update({
       where: {
-        gameId_name: {
-          gameId,
-          name: dto.oldName,
-        },
+        gameId,
+        id: dto.teamId,
       },
       data: {
         name: dto.newName,

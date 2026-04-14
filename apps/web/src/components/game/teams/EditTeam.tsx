@@ -45,6 +45,8 @@ export const EditTeam = ({ team, gameId } : { team: Team, gameId: string }) => {
 			body: JSON.stringify(payload)
 		});
 		await mutate(["teams", gameId]);
+		await mutate(["markets", gameId]);
+		await mutate(["bets", gameId]);
 		setEditText(false);
 	}
 
