@@ -33,6 +33,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
   ) {
     client.join(`game:${body.gameId}`);
+    console.log(`Socket ${client.id} joined room game:${body.gameId}`);
     return { ok: true };
   }
 
@@ -48,6 +49,23 @@ export class WsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   emitMarketCreated(gameId: string, payload: { name: string }) {
     this.server.to(`game:${gameId}`).emit('game.market_created', {
+      gameId,
+      ...payload,
+    });
+  }
+
+  emitMarketSettled(
+    gameId: string,
+    payload: { id: string; name: string; winningSelectionId: string },
+  ) {
+    this.server.to(`game:${gameId}`).emit('game.market_settled', {
+      gameId,
+      ...payload,
+    });
+  }
+
+  emitMarketClosed(gameId: string, payload: { id: string; name: string }) {
+    this.server.to(`game:${gameId}`).emit('game.market_closed', {
       gameId,
       ...payload,
     });

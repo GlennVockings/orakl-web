@@ -232,12 +232,9 @@ export class GamesService {
     const now = new Date();
 
     const result = await this.prisma.$transaction(async (tx) => {
-      // 1) Create membership (or no-op if already exists)
-      // Because you have @@unique([gameId, userId]) on GameMember
       const membership = await tx.gameMember.upsert({
         where: { gameId_userId: { gameId: game.id, userId } },
         update: {
-          // If they re-join, just bump lastSeenAt
           lastSeenAt: now,
         },
         create: {
@@ -248,7 +245,6 @@ export class GamesService {
         },
       });
 
-      // 2) Give starting chips once (if no txns exist for this user in this game)
       const hasAnyTxn = await tx.gameLedgerTxn.findFirst({
         where: { gameId: game.id, userId },
         select: { id: true },
@@ -265,7 +261,6 @@ export class GamesService {
         });
       }
 
-      // 3) Touch game activity (so other users see "updates")
       await tx.game.update({
         where: { id: game.id },
         data: { lastActivityAt: now },
