@@ -10,7 +10,23 @@ export function GameRealtime({ gameId }: { gameId: string }) {
   useEffect(() => {
     const socket = getSocket();
 
-    socket.emit("join_game_room", { gameId });
+    const joinRoom = () => {
+      socket.emit("join_game_room", { gameId });
+      console.log("joined room", gameId, socket.id);
+    };
+
+    const onConnect = () => {
+      console.log("socket connected", socket.id);
+      joinRoom();
+    };
+
+    const onDisconnect = (reason: string) => {
+      console.log("socket disconnected", reason);
+    };
+
+    const onReconnectAttempt = () => {
+      console.log("socket reconnect attempt");
+    };
 
     const onMemberJoined = (payload: {
       gameId: string;
@@ -65,13 +81,25 @@ export function GameRealtime({ gameId }: { gameId: string }) {
       mutate(["markets", gameId]);
     }
 
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+    socket.io.on("reconnect_attempt", onReconnectAttempt);
     socket.on("game.member_joined", onMemberJoined);
     socket.on("game.team_created", onTeamCreated);
     socket.on("game.market_created", onMarketCreated);
     socket.on("game.market_settled", onMarketSettled);
     socket.on("game.market_closed", onMarketClosed);
 
+
+
+    if (socket.connected) {
+      joinRoom();
+    }
+
     return () => {
+      socket.off("connect", onConnect);
+      socket.off("disconnect", onDisconnect);
+      socket.io.off("reconnect_attempt", onReconnectAttempt);
       socket.off("game.member_joined", onMemberJoined);
       socket.off("game.team_created", onTeamCreated);
       socket.off("game.market_created", onMarketCreated);

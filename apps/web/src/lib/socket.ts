@@ -7,6 +7,11 @@ export function getSocket() {
 		socket = io(process.env.NEXT_PUBLIC_API_URL!, {
 			withCredentials: true,
 			transports: ["websocket"],
+			reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      timeout: 20000,
 		});
 	}
 
