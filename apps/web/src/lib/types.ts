@@ -47,6 +47,7 @@ export interface LeaderboardEntry {
 	currentBalance: number;
 	settledBalance: number;
 	rankDelta?: number;
+	previousRank?: number;
 }
 
 export interface Team {
@@ -74,7 +75,7 @@ export interface Selection {
 export interface Bet {
 	id: string;
 	stake: number;
-	potenitalReturn: number;
+	potentialReturn: number;
 	status: BetStatus;
 	placedAt: string;
 }

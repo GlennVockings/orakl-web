@@ -1,7 +1,7 @@
 "use client"
 
 import { ScrollArea } from "../ui/scroll-area"
-import { ChevronDown, User } from "lucide-react"
+import { ChevronDown, ChevronUp, User } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Spinner } from "../ui/spinner";
 import { useLeaderboard } from "@/hooks";
@@ -10,6 +10,22 @@ import { Button } from "../ui/button";
 
 export const Leaderboard = ({ gameId } : { gameId: string }) => {
 	const { leaderboard, error, isLoading } = useLeaderboard(gameId)
+
+	function renderDelta(delta: number) {
+		if (delta > 0) {
+			return (
+				<ChevronUp />
+			)
+		} else if (delta < 0) {
+			return (
+				<ChevronUp />
+			)
+		} else {
+			return (
+				<div className="w-6"></div>
+			)
+		}
+	}
 
   if (isLoading) {
     return <div className="p-2"><Spinner /> Loading leaderboard...</div>;
@@ -43,6 +59,7 @@ export const Leaderboard = ({ gameId } : { gameId: string }) => {
 												<div key={entry.userId} className="bg-accent flex items-center p-4 rounded-md">
 													<div className="font-[Space_Grotesk] pr-5">
 														<p className="text-2xl">{ String(entry.rank).padStart(2, "0") }</p>
+														{ renderDelta(entry.rankDelta || 0) }
 													</div>
 													<div className="flex-grow text-white font-bold">
 														<p>{ entry.displayName }</p>

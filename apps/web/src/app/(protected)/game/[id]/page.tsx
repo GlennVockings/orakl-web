@@ -1,5 +1,4 @@
 import { BetsList, GameInfo, GameRealtime, Leaderboard, Markets, MarkSeen, Teams } from "@/components";
-import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -26,12 +25,9 @@ export default async function Game({
 				<Teams gameId={id} />
 			</div>
 			<div className="flex flex-col gap-4 lg:col-span-2">
+				<Markets gameId={id} />
 				<div>
-					<p className="font-[Space_Grotesk] uppercase text-2xl">Markets</p>
-					<Markets gameId={id} />
-				</div>
-				<div>
-					<p className="font-[Space_Grotesk] uppercase">Bet History</p>
+					<p className="font-[Space_Grotesk] uppercase text-2xl">Stakes</p>
 					<BetsList gameId={id} />
 				</div>
 			</div>
