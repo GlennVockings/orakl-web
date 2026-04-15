@@ -228,7 +228,7 @@ export class MarketsService {
       throw new BadRequestException('Market does not exist for this game');
     }
 
-    if (market.status !== 'CLOSED') {
+    if (market.status !== MarketStatus.CLOSED) {
       throw new ForbiddenException('Only closed markets can be settled');
     }
 
@@ -303,7 +303,7 @@ export class MarketsService {
       await tx.market.update({
         where: { id: marketId },
         data: {
-          status: 'SETTLED',
+          status: MarketStatus.SETTLED,
         },
       });
 

@@ -3,7 +3,13 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
-import { BetStatus, LedgerType, Prisma, SelectionStatus } from '@prisma/client';
+import {
+  BetStatus,
+  LedgerType,
+  MarketStatus,
+  Prisma,
+  SelectionStatus,
+} from '@prisma/client';
 import { PrismaService } from '../prisma.service';
 import { CreateBetDto } from './dto/create-bet.dto';
 
@@ -314,5 +320,71 @@ export class BetsService {
         },
       };
     });
+  }
+
+  async undoBet(userId: string, gameId: string, betId: string) {
+    const now = new Date();
+
+    const bet = await this.prisma.bet.findFirst({
+      where: {
+        gameId,
+        id: betId,
+        userId,
+      },
+      include: {
+        selection: {
+          include: {
+            market: {
+              select: {
+                id: true,
+                status: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!bet) {
+      throw new BadRequestException('Bet does not exist');
+    }
+
+    if (bet.status !== BetStatus.PENDING) {
+      throw new BadRequestException('Bet is not pending');
+    }
+
+    if (bet.selection.market.status !== MarketStatus.OPEN) {
+      throw new BadRequestException(
+        'Market has been closed or settled, unable to undo',
+      );
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.bet.update({
+        where: {
+          id: betId,
+        },
+        data: {
+          status: BetStatus.VOID,
+          settledAt: now,
+        },
+      });
+
+      await tx.gameLedgerTxn.create({
+        data: {
+          gameId,
+          userId: bet.userId,
+          type: LedgerType.REFUND,
+          amount: bet.stake,
+          betId: bet.id,
+          marketId: bet.selection.marketId,
+        },
+      });
+    });
+
+    return {
+      ok: true,
+      betId,
+    };
   }
 }

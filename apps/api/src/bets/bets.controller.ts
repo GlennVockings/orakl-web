@@ -42,4 +42,16 @@ export class BetsController {
     await this.gameAccess.requireGameMember(userId, gameId);
     return this.bets.getUserBets(userId, gameId);
   }
+
+  @UseGuards(BetterAuthJwtGuard)
+  @Post(':betId/undo')
+  async undoBet(
+    @Req() req: { user: string },
+    @Param('gameId') gameId: string,
+    @Param('betId') betId: string,
+  ) {
+    const userId = getUserIdFromJwtPayload(req.user);
+    await this.gameAccess.requireGameMember(userId, gameId);
+    return this.bets.undoBet(userId, gameId, betId);
+  }
 }
