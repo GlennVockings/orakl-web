@@ -1,9 +1,11 @@
 "use client"
 
 import { useBets } from "@/hooks"
-import { Spinner } from "../ui/spinner";
-import { Badge } from "../ui/badge";
-import { Info } from "lucide-react";
+import { Spinner } from "../../ui/spinner";
+import { Badge } from "../../ui/badge";
+import { Info, RotateCcw } from "lucide-react";
+import { Button } from "../../ui/button";
+import { UndoBet } from "./UndoBet";
 
 
 export const BetsList = ({ gameId } : { gameId: string }) => {
@@ -34,13 +36,14 @@ export const BetsList = ({ gameId } : { gameId: string }) => {
 						<div key={bet.id} className="p-4 bg-accent rounded-md flex flex-col gap-4">
 							<div className="flex justify-between">
 								<p className="font-[Space_Grotesk] uppercase">{ bet.market.name }</p>
-								<Badge>{ bet.status }</Badge>
+								<UndoBet gameId={gameId} betId={bet.id} />
 							</div>
 							<div className="flex justify-between">
 								<div>
 									<p className="text-xs uppercase font-[Space_Grotesk] tracking-wide">selection</p>
 									<p className="font-semibold">{ bet.selection.team !== null ? bet.selection.team?.name : bet.selection.label }</p>
 								</div>
+								<Badge>{ bet.status }</Badge>
 								<div>
 									<p className="text-xs text-right font-[Space_Grotesk] uppercase tracking-wide">amount</p>
 									{

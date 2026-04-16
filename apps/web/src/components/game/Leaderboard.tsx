@@ -14,15 +14,15 @@ export const Leaderboard = ({ gameId } : { gameId: string }) => {
 	function renderDelta(delta: number) {
 		if (delta > 0) {
 			return (
-				<ChevronUp />
+				<ChevronUp size={18} color={"#00FF00"} />
 			)
 		} else if (delta < 0) {
 			return (
-				<ChevronUp />
+				<ChevronDown size={18} color={"#FF0000"} />
 			)
 		} else {
 			return (
-				<div className="w-6"></div>
+				<div className="w-6 h-6"></div>
 			)
 		}
 	}
@@ -56,10 +56,10 @@ export const Leaderboard = ({ gameId } : { gameId: string }) => {
 									<div className="flex flex-col gap-2">
 										{
 											leaderboard?.map((entry) => (
-												<div key={entry.userId} className="bg-accent flex items-center p-4 rounded-md">
-													<div className="font-[Space_Grotesk] pr-5">
-														<p className="text-2xl">{ String(entry.rank).padStart(2, "0") }</p>
+												<div key={entry.userId} className="bg-accent flex items-center py-4 px-2 rounded-md">
+													<div className="font-[Space_Grotesk] pr-3 flex gap-1 items-center">
 														{ renderDelta(entry.rankDelta || 0) }
+														<p className="text-2xl leading-none">{ String(entry.rank).padStart(2, "0") }</p>
 													</div>
 													<div className="flex-grow text-white font-bold">
 														<p>{ entry.displayName }</p>
