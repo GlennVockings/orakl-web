@@ -127,7 +127,7 @@ export class MarketsService {
       });
 
       this.wsGateway.emitMarketCreated(gameId, {
-        name: market.name,
+        name: dto.name,
       });
 
       return market;
