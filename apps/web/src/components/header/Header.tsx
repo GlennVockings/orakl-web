@@ -1,5 +1,4 @@
 import Link from "next/link";
-import ThemeToggle from "../theme-toggle";
 import { AccountButton } from "./AccountButton";
 
 export const SiteHeader = () => {
@@ -14,7 +13,6 @@ export const SiteHeader = () => {
         {/* Actions */}
         <div className="flex items-center gap-2">
           <AccountButton />
-          <ThemeToggle />
         </div>
       </div>
     </header>

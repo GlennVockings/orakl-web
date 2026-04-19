@@ -1,7 +1,6 @@
 export * from "./header"
 export * from "./Footer"
 export * from "./providers"
-export * from "./Step"
 export * from "./theme-toggle"
 export * from "./login"
 export * from "./account"
