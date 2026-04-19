@@ -2,46 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { HandCoins, Info, Percent, Shield, TrendingUpDown, Trophy, UserPlus } from "lucide-react";
-import Link from "next/link";
+import { HandCoins, Percent, Shield, TrendingUpDown, Trophy, UserPlus } from "lucide-react";
 
 export default function Home() {
   return (
     <div className="my-10">
-
-      {/* GAMBLING DISCLAIMER */}
-      {/* <div className="mt-1 rounded-lg border bg-muted px-4 py-3 text-sm text-muted-foreground">
-        <div className="flex gap-1">
-          <Info className="h-4 w-4 mt-0.5" />
-          <p>
-            <strong>Important:</strong> This platform does <strong>not</strong> involve real money,
-            does <strong>not</strong> facilitate or encourage gambling, and is intended
-            for <strong>entertainment purposes only</strong>.
-          </p>
-        </div>
-        <p className="mt-2">
-          If gambling is affecting you or someone you know, help is available.
-          Visit{" "}
-          <a
-            href="https://www.begambleaware.org"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline font-medium"
-          >
-            BeGambleAware
-          </a>{" "}
-          or{" "}
-          <a
-            href="https://www.ncpgambling.org"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline font-medium"
-          >
-            the National Council on Problem Gambling
-          </a>{" "}
-          for free, confidential support.
-        </p>
-      </div> */}
 
       {/* Hero */}
       <div className="w-96 h-96 bg-primary/5 absolute left-1/2 -translate-x-1/2 blur-3xl rounded-b-full"></div>
