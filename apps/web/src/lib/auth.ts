@@ -34,6 +34,7 @@ export const auth = betterAuth({
   // Helps with cookies/cors when calling /api/auth from browser
   trustedOrigins: [
     "http://localhost:3000",
-    "http://192.168.1.243:3000"
+    "http://192.168.1.243:3000",
+    "https://faux-stakes-web.vercel.app"
   ],
 });
