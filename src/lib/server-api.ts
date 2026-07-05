@@ -3,7 +3,6 @@ import { cookies } from "next/headers";
 import { cache } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL!;
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL!; // e.g. http://localhost:3000
 
 const getJwtFromBetterAuth = cache( async(): Promise<string | null> => {
   const cookieHeader = (await cookies())
@@ -12,7 +11,7 @@ const getJwtFromBetterAuth = cache( async(): Promise<string | null> => {
     .join("; ");
 
   // This hits your Next route handler that Better Auth exposes
-  const res = await fetch(`${APP_URL}/api/auth/token`, {
+  const res = await fetch(`${API_URL}/api/auth/token`, {
     method: "POST",
     headers: { cookie: cookieHeader }, // forward session cookie
     cache: "no-store",

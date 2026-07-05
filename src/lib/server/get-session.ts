@@ -4,7 +4,7 @@ export async function getSession() {
   const h = await headers();
   const cookie = h.get("cookie") ?? "";
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/auth/get-session`, {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/get-session`, {
     headers: { cookie },
   });
 
