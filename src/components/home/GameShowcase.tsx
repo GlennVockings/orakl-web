@@ -1,25 +1,35 @@
-import { PageContainer, EnergyLine } from "@/components";
+import { GameCard } from "./GameCard";
 
-const games = [
-  { id: "faux-stakes", title: "Faux Stakes", description: "Friendly markets. Fake stakes. Real bragging rights.", caption: "The existing game remains available while Orakl grows into a multi-game platform." },
-  { id: "predictor", title: "Predictor", description: "Predict the outcome of events and earn bragging rights.", caption: "Join the community of predictors and test your knowledge." },
-];
-
-export const GameShowcase = () => {
+export function GameShowcase() {
   return (
-    <PageContainer className="py-16 sm:py-20">
-      <div className="flex gap-4">
-        {games.map(({ id, title, description, caption }) => (
-          <div className="relative overflow-hidden rounded-xl bg-card px-6 py-10 text-brand transition-all cursor-pointer sm:px-10 hover:-translate-y-2 hover:shadow" data-product={id} key={id}>
-            <EnergyLine className="text-brand" />
-            <div className="relative max-w-xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-brand">{title}</p>
-              <h2 className="mt-3 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">{description}</h2>
-              <p className="mt-4 text-brand/70">{caption}</p>
-            </div>
-          </div>
-        ))}
+    <section className="bg-background py-24 sm:py-32">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="max-w-2xl">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+            Games
+          </p>
+
+          <h2 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
+            Choose how you want to compete.
+          </h2>
+        </div>
+
+        <div className="mt-12 grid gap-6 lg:grid-cols-2">
+          <GameCard
+            name="Predictor"
+            description="Make your calls, follow the action and compete against the people who know you best."
+            href="/predictor"
+            product="predictor"
+          />
+
+          <GameCard
+            name="Faux Stakes"
+            description="Create markets around the moments that matter and prove who really knows what happens next."
+            href="/faux-stakes"
+            product="faux-stakes"
+          />
+        </div>
       </div>
-    </PageContainer>
-  )
+    </section>
+  );
 }

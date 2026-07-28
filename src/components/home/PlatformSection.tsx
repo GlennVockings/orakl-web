@@ -1,33 +1,54 @@
-import { CircleCheck, Network, Sparkles, Trophy } from "lucide-react";
-import { PageContainer } from "../layout";
-
-const principles = [
-  { icon: CircleCheck, title: "Clear", description: "Easy to scan, understand and act on." },
-  { icon: Sparkles, title: "Simple", description: "Focused experiences without unnecessary noise." },
-  { icon: Network, title: "Connected", description: "People, predictions and competitions feel linked." },
-  { icon: Trophy, title: "Punchy", description: "Competitive moments bring colour, motion and energy." },
+const features = [
+  {
+    title: "One identity",
+    description:
+      "Carry your profile, history and achievements across every Orakl game.",
+  },
+  {
+    title: "Shared competitions",
+    description:
+      "Play with friends, communities and rivals without starting from scratch.",
+  },
+  {
+    title: "Connected leaderboards",
+    description:
+      "See how your predictions perform within each game and across the platform.",
+  },
 ];
 
-export const PlatformSection = () => {
+export function PlatformSection() {
   return (
-    <section className="relative overflow-hidden border-b bg-surface py-20 sm:py-28">
-      <PageContainer>
-        <div className="mb-8 max-w-2xl">
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-muted-foreground">The Orakl system</p>
-          <h2 className="mt-2 text-3xl font-semibold tracking-[-0.035em] sm:text-4xl">Professional product design with social energy.</h2>
+    <section className="py-24 sm:py-32 bg-surface">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="grid gap-16 lg:grid-cols-[0.8fr_1.2fr]">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              The platform
+            </p>
+
+            <h2 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
+              More than a collection of games.
+            </h2>
+
+            <p className="mt-6 max-w-xl text-lg leading-8 text-muted-foreground">
+              Orakl connects every competition through one shared platform while
+              allowing each game to keep its own identity.
+            </p>
+          </div>
+
+          <div className="grid gap-px overflow-hidden rounded-2xl border bg-border sm:grid-cols-3">
+            {features.map((feature) => (
+              <article key={feature.title} className="bg-background p-8">
+                <h3 className="text-xl font-semibold">{feature.title}</h3>
+
+                <p className="mt-4 leading-7 text-muted-foreground">
+                  {feature.description}
+                </p>
+              </article>
+            ))}
+          </div>
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {principles.map(({ icon: Icon, title, description }) => (
-            <article className="surface-panel p-5" key={title}>
-              <div className="mb-8 inline-flex size-10 items-center justify-center rounded-md bg-product-subtle text-product">
-                <Icon className="size-5" />
-              </div>
-              <h3 className="font-semibold">{title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{description}</p>
-            </article>
-          ))}
-        </div>
-      </PageContainer>
+      </div>
     </section>
-  )
+  );
 }
