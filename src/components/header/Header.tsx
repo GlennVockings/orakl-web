@@ -1,20 +1,16 @@
-import Link from "next/link";
+import { OraklLogo } from "@/components/brand";
+import { PageContainer } from "@/components/layout";
 import { AccountButton } from "./AccountButton";
 
-export const SiteHeader = () => {
+export function SiteHeader() {
   return (
-    <header className="bg-background shadow-xl shadow-primary/5">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-        {/* Brand */}
-        <Link href="/" className="text-primary uppercase text-xl font-[Space_Grotesk]">
-          Faux Stakes
-        </Link>
-
-        {/* Actions */}
+    <header className="sticky top-0 z-50 border-b bg-background/90 backdrop-blur-xl">
+      <PageContainer className="flex h-16 items-center justify-between">
+        <OraklLogo />
         <div className="flex items-center gap-2">
           <AccountButton />
         </div>
-      </div>
+      </PageContainer>
     </header>
   );
 }

@@ -3,191 +3,252 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * Orakl design-system foundation
+ *
+ * Layers:
+ * 1. Primitive brand values live as CSS custom properties.
+ * 2. Semantic shadcn tokens describe how values are used.
+ * 3. Product scopes override the accent without changing components.
+ */
 @theme inline {
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-space-grotesk);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Orakl semantic utilities */
+  --color-surface: var(--surface);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-strong: var(--surface-strong);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+
+  --radius-sm: calc(var(--radius) - 0.25rem);
+  --radius-md: calc(var(--radius) - 0.125rem);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --shadow-3xs: rgba(44, 230, 255, 0.35) 0px 0px 5px;
+  --radius-xl: calc(var(--radius) + 0.25rem);
+  --radius-2xl: calc(var(--radius) + 0.75rem);
 
-  --color-blackened-blue: var(--blackened-blue);
-  --color-volt-orange: var(--volt-orange);
-  --color-iron-navy: var(--iron-navy);
-  --color-cloud-gray: var(--cloud-gray);
-  --color-saffron: var(--saffron);
+  --shadow-xs: var(--shadow-xs-value);
+  --shadow-sm: var(--shadow-sm-value);
+  --shadow-md: var(--shadow-md-value);
+  --shadow-lg: var(--shadow-lg-value);
 }
 
 :root {
-  --radius: 0.375rem;
+  color-scheme: light;
 
-  /* Base */
-  --background: #0C0D1B;
-  --foreground: #E5E3F8;
+  /* Brand primitives */
+  --orakl-porcelain: #f8f7f4;
+  --orakl-white: #ffffff;
+  --orakl-ink: #171717;
+  --orakl-charcoal: #272725;
+  --orakl-stone-700: #4b4a46;
+  --orakl-stone-500: #75736d;
+  --orakl-stone-300: #c8c5bd;
+  --orakl-stone-200: #dedbd3;
+  --orakl-stone-100: #ebe8e1;
+  --orakl-stone-50: #f2f0eb;
 
-  /* Surfaces */
-  --card: #111222;
-  --card-foreground: #E5E3F8;
+  /* Product primitives */
+  --orakl-signal-blue: #0057ff;
+  --orakl-signal-blue-hover: #0048d6;
+  --orakl-signal-blue-soft: #eaf1ff;
+  --orakl-faux-stakes: #f05a28;
+  --orakl-faux-stakes-hover: #d94718;
+  --orakl-faux-stakes-soft: #fff0e9;
 
-  --popover: rgb(17 18 34 / 0.6);
-  --popover-foreground: #E5E3F8;
+  /* Shape and elevation */
+  --radius: 0.75rem;
+  --shadow-xs-value: 0 1px 2px rgb(23 23 23 / 0.05);
+  --shadow-sm-value:
+    0 1px 2px rgb(23 23 23 / 0.06), 0 4px 12px rgb(23 23 23 / 0.04);
+  --shadow-md-value:
+    0 2px 4px rgb(23 23 23 / 0.05), 0 12px 28px rgb(23 23 23 / 0.08);
+  --shadow-lg-value:
+    0 4px 8px rgb(23 23 23 / 0.05), 0 24px 56px rgb(23 23 23 / 0.1);
 
-  /* Brand / action */
-  --primary: #2BE6FF;
-  --primary-foreground: #0C0D1B;
+  /* Platform semantics */
+  --background: var(--orakl-white);
+  --foreground: var(--orakl-ink);
 
-  --secondary: #10DDF6;
-  --secondary-foreground: #0C0D1B;
+  --card: var(--orakl-porcelain);
+  --card-foreground: var(--orakl-ink);
 
-  /* Subtle UI */
-  --muted: #111222;
-  --muted-foreground: #A7ABC0;
+  --popover: var(--orakl-white);
+  --popover-foreground: var(--orakl-ink);
 
-  --accent: #292A41;
-  --accent-foreground: #2BE6FF;
+  /* Neutral platform action. Product scopes replace this accent. */
+  --brand: var(--orakl-charcoal);
+  --brand-foreground: var(--orakl-white);
+  --primary: var(--brand);
+  --primary-foreground: var(--brand-foreground);
 
-  /* Borders / inputs */
-  --border: rgb(70 71 87 / 0.15);
-  --input: rgb(70 71 87 / 0.15);
-  --ring: rgb(43 230 255 / 0.6);
+  --secondary: var(--orakl-stone-50);
+  --secondary-foreground: var(--orakl-charcoal);
 
-  /* States */
-  --destructive: #D7383B;
-  --destructive-foreground: #FBEBEC;
+  --muted: var(--orakl-stone-50);
+  --muted-foreground: var(--orakl-stone-500);
 
-  /* Charts */
-  --chart-1: #2BE6FF;
-  --chart-2: #10DDF6;
-  --chart-3: #5FE9FF;
-  --chart-4: #292A41;
-  --chart-5: #747486;
+  --accent: var(--orakl-stone-100);
+  --accent-foreground: var(--orakl-charcoal);
+
+  --border: var(--orakl-stone-200);
+  --input: var(--orakl-stone-200);
+  --ring: var(--brand);
+
+  --destructive: #d92d20;
+  --destructive-foreground: #ffffff;
+  --success: #15803d;
+  --success-foreground: #ffffff;
+  --warning: #b45309;
+  --warning-foreground: #ffffff;
+
+  /* Extended surfaces */
+  --surface: var(--orakl-porcelain);
+  --surface-subtle: var(--orakl-stone-50);
+  --surface-raised: var(--orakl-white);
+  --surface-strong: var(--orakl-charcoal);
+
+  /* Charts default to a balanced platform palette. */
+  --chart-1: #0057ff;
+  --chart-2: #0f8a74;
+  --chart-3: #7c3aed;
+  --chart-4: #d97706;
+  --chart-5: #dc2626;
 
   /* Sidebar */
-  --sidebar: #111222;
-  --sidebar-foreground: #E5E3F8;
-  --sidebar-primary: #2BE6FF;
-  --sidebar-primary-foreground: #0C0D1B;
-  --sidebar-accent: #171829;
-  --sidebar-accent-foreground: #2BE6FF;
-  --sidebar-border: rgb(70 71 87 / 0.15);
-  --sidebar-ring: rgb(43 230 255 / 0.6);
-
-  /* Extra design-system tokens */
-  --surface: #0C0D1B;
-  --surface-container-low: #111222;
-  --surface-container: #171829;
-  --surface-bright: #292A41;
-  --outline-variant: #464757;
-  --primary-fixed: #2BE6FF;
-  --primary-gradient-from: #5FE9FF;
-  --primary-gradient-to: #10DDF6;
+  --sidebar: var(--orakl-white);
+  --sidebar-foreground: var(--orakl-ink);
+  --sidebar-primary: var(--brand);
+  --sidebar-primary-foreground: var(--brand-foreground);
+  --sidebar-accent: var(--orakl-stone-50);
+  --sidebar-accent-foreground: var(--orakl-charcoal);
+  --sidebar-border: var(--orakl-stone-200);
+  --sidebar-ring: var(--brand);
 }
 
-:root {
-  --radius: 0.375rem;
+/*
+ * Product themes
+ * Add data-product to any product shell or route layout:
+ * <div data-product="predictor">...</div>
+ */
+[data-product="predictor"] {
+  --brand: var(--orakl-signal-blue);
+  --brand-foreground: #ffffff;
+  --primary: var(--orakl-signal-blue);
+  --primary-foreground: #ffffff;
+  --accent: var(--orakl-signal-blue-soft);
+  --accent-foreground: #003ca8;
+  --ring: var(--orakl-signal-blue);
+  --sidebar-primary: var(--orakl-signal-blue);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--orakl-signal-blue-soft);
+  --sidebar-accent-foreground: #003ca8;
+  --sidebar-ring: var(--orakl-signal-blue);
+  --chart-1: var(--orakl-signal-blue);
+}
 
-  /* Base */
-  --background: #0C0D1B;
-  --foreground: #E5E3F8;
-
-  /* Surfaces */
-  --card: #111222;
-  --card-foreground: #E5E3F8;
-
-  --popover: rgb(17 18 34 / 0.6);
-  --popover-foreground: #E5E3F8;
-
-  /* Brand / action */
-  --primary: #2BE6FF;
-  --primary-foreground: #0C0D1B;
-
-  --secondary: #10DDF6;
-  --secondary-foreground: #0C0D1B;
-
-  /* Subtle UI */
-  --muted: #111222;
-  --muted-foreground: #A7ABC0;
-
-  --accent: #292A41;
-  --accent-foreground: #2BE6FF;
-
-  /* Borders / inputs */
-  --border: rgb(70 71 87 / 0.15);
-  --input: rgb(70 71 87 / 0.15);
-  --ring: rgb(43 230 255 / 0.6);
-
-  /* States */
-  --destructive: #D7383B;
-  --destructive-foreground: #FBEBEC;
-
-  /* Charts */
-  --chart-1: #2BE6FF;
-  --chart-2: #10DDF6;
-  --chart-3: #5FE9FF;
-  --chart-4: #292A41;
-  --chart-5: #747486;
-
-  /* Sidebar */
-  --sidebar: #111222;
-  --sidebar-foreground: #E5E3F8;
-  --sidebar-primary: #2BE6FF;
-  --sidebar-primary-foreground: #0C0D1B;
-  --sidebar-accent: #171829;
-  --sidebar-accent-foreground: #2BE6FF;
-  --sidebar-border: rgb(70 71 87 / 0.15);
-  --sidebar-ring: rgb(43 230 255 / 0.6);
-
-  /* Extra design-system tokens */
-  --surface: #0C0D1B;
-  --surface-container-low: #111222;
-  --surface-container: #171829;
-  --surface-bright: #292A41;
-  --outline-variant: #464757;
-  --primary-fixed: #2BE6FF;
-  --primary-gradient-from: #5FE9FF;
-  --primary-gradient-to: #10DDF6;
+[data-product="faux-stakes"] {
+  --brand: var(--orakl-faux-stakes);
+  --brand-foreground: #ffffff;
+  --primary: var(--orakl-faux-stakes);
+  --primary-foreground: #ffffff;
+  --accent: var(--orakl-faux-stakes-soft);
+  --accent-foreground: #9f2f0c;
+  --ring: var(--orakl-faux-stakes);
+  --sidebar-primary: var(--orakl-faux-stakes);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--orakl-faux-stakes-soft);
+  --sidebar-accent-foreground: #9f2f0c;
+  --sidebar-ring: var(--orakl-faux-stakes);
+  --chart-1: var(--orakl-faux-stakes);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
+  html {
+    @apply bg-background;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply min-h-screen bg-background font-sans text-foreground antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-space-grotesk), var(--font-inter), sans-serif;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--brand) 22%, transparent);
   }
 
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;
+  }
+
+  :disabled {
+    cursor: not-allowed;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .surface-panel {
+    @apply rounded-lg border bg-background text-card-foreground shadow-xs;
   }
 }

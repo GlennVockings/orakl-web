@@ -1,9 +1,9 @@
 "use client"
 
 import { useGameMe, useTeams } from "@/hooks"
-import { Spinner } from "../../ui/spinner";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../../ui/sheet";
-import { Button } from "../../ui/button";
+import { Spinner } from "@/components/ui/spinner";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 import { EditTeam } from "./EditTeam";
 import { AddTeam } from "./AddTeam";
 

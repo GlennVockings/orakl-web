@@ -1,12 +1,12 @@
 "use client"
 
-import { ScrollArea } from "../ui/scroll-area"
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronDown, ChevronUp, User } from "lucide-react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { Spinner } from "../ui/spinner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Spinner } from "@/components/ui/spinner";
 import { useLeaderboard } from "@/hooks";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "../ui/sheet";
-import { Button } from "../ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 
 export const Leaderboard = ({ gameId } : { gameId: string }) => {
 	const { leaderboard, error, isLoading } = useLeaderboard(gameId)

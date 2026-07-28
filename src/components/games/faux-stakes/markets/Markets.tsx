@@ -1,6 +1,6 @@
 "use client"
 
-import { Badge } from "../../ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { SelectionForm } from "./SelectionForm";
 import { AddMarket } from "./AddMarket";
 import { useGameMe, useMarkets, useTeams } from "@/hooks";

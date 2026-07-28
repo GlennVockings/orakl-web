@@ -1,0 +1,37 @@
+import { OraklMark, PageContainer } from "@/components"
+import { Button } from "@/components/ui/button"
+import { ArrowRight } from "lucide-react"
+import Link from "next/link"
+
+export const HomeHero = () => {
+  return (
+    <section className="relative overflow-hidden border-b bg-surface py-20 sm:py-28">
+      <PageContainer className="relative flex items-center">
+        <div className="max-w-3xl">
+          <p className="mb-5 text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Social competition, made simple
+          </p>
+          <h1 className="text-balance text-5xl font-semibold tracking-[-0.055em] sm:text-7xl">
+            Predict. Compete. <span className="text-primary">Connect.</span>
+          </h1>
+          <p className="mt-6 max-w-2xl text-lg text-muted-foreground sm:text-xl">
+            Orakl brings friends, colleagues and communities together through competitive games built around the events they already care about.
+          </p>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Button asChild size="lg">
+              <Link href="/login">
+                Get started <ArrowRight />
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline">
+              <Link href="/account">View your games</Link>
+            </Button>
+          </div>
+        </div>
+        <div>
+          <OraklMark className="h-64 w-64" />
+        </div>
+      </PageContainer>
+    </section>
+  )
+}

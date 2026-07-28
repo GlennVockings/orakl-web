@@ -1,7 +1,7 @@
 "use client"
 
 import { useGameMe, useInfo } from "@/hooks";
-import { Spinner } from "../ui/spinner";
+import { Spinner } from "@/components/ui/spinner";
 
 export const GameInfo = ({ gameId } : { gameId: string }) => {
 	const { game, error, isLoading } = useInfo(gameId);

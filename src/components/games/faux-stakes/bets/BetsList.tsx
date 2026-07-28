@@ -1,10 +1,10 @@
 "use client"
 
 import { useBets } from "@/hooks"
-import { Spinner } from "../../ui/spinner";
-import { Badge } from "../../ui/badge";
+import { Spinner } from "@/components/ui/spinner";
+import { Badge } from "@/components/ui/badge";
 import { Info, RotateCcw } from "lucide-react";
-import { Button } from "../../ui/button";
+import { Button } from "@/components/ui/button";
 import { UndoBet } from "./UndoBet";
 
 
