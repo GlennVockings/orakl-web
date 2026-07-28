@@ -35,22 +35,22 @@ export const BetsList = ({ gameId } : { gameId: string }) => {
 					return (
 						<div key={bet.id} className="p-4 bg-accent rounded-md flex flex-col gap-4">
 							<div className="flex justify-between">
-								<p className="font-[Space_Grotesk] uppercase">{ bet.market.name }</p>
+								<p className=" uppercase">{ bet.market.name }</p>
 								<UndoBet gameId={gameId} betId={bet.id} />
 							</div>
 							<div className="flex justify-between">
 								<div>
-									<p className="text-xs uppercase font-[Space_Grotesk] tracking-wide">selection</p>
+									<p className="text-xs uppercase  tracking-wide">selection</p>
 									<p className="font-semibold">{ bet.selection.team !== null ? bet.selection.team?.name : bet.selection.label }</p>
 								</div>
 								<Badge>{ bet.status }</Badge>
 								<div>
-									<p className="text-xs text-right font-[Space_Grotesk] uppercase tracking-wide">amount</p>
+									<p className="text-xs text-right  uppercase tracking-wide">amount</p>
 									{
 										bet.winningSelection !== null && bet.winningSelection.id === bet.selection.id ? (
-											<p className="text-primary tracking-wide font-[Space_Grotesk] text-right">+{ bet.potentialReturn  }</p>
+											<p className="text-primary tracking-wide  text-right">+{ bet.potentialReturn  }</p>
 										) : (
-											<p className="text-destructive tracking-wide font-[Space_Grotesk] text-right">-{ bet.stake }</p>
+											<p className="text-destructive tracking-wide  text-right">-{ bet.stake }</p>
 										)
 									}
 								</div>

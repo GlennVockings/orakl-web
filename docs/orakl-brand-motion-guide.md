@@ -54,21 +54,21 @@ The system should feel modern and digital without becoming cold or over-technica
 
 ### Platform colours
 
-| Role | Colour | Value |
-|---|---|---|
-| Porcelain | Warm primary platform surface | `#F8F7F4` |
-| White | Contrast surface and section background | `#FFFFFF` |
-| Ink | Primary text | `#171717` |
-| Charcoal | Neutral brand accent and node sculpture | `#272725` |
-| Stone 500 | Muted text | `#75736D` |
-| Stone 200 | Borders | `#DEDBD3` |
+| Role      | Colour                                  | Value     |
+| --------- | --------------------------------------- | --------- |
+| Porcelain | Warm primary platform surface           | `#F8F7F4` |
+| White     | Contrast surface and section background | `#FFFFFF` |
+| Ink       | Primary text                            | `#171717` |
+| Charcoal  | Neutral brand accent and node sculpture | `#272725` |
+| Stone 500 | Muted text                              | `#75736D` |
+| Stone 200 | Borders                                 | `#DEDBD3` |
 
 ### Game colours
 
-| Game | Brand colour | Soft colour |
-|---|---|---|
-| Predictor | Signal Blue `#0057FF` | `#EAF1FF` |
-| Faux Stakes | Orange `#F05A28` | `#FFF0E9` |
+| Game        | Brand colour          | Soft colour |
+| ----------- | --------------------- | ----------- |
+| Predictor   | Signal Blue `#0057FF` | `#EAF1FF`   |
+| Faux Stakes | Orange `#F05A28`      | `#FFF0E9`   |
 
 Future games receive their own accent but must use the same interaction and surface rules.
 
@@ -345,7 +345,6 @@ When a game card is hovered or focused:
 
 Current direction:
 
-- display/headings: Space Grotesk
 - body/UI: Inter
 
 Typography should remain clean and direct.
@@ -491,4 +490,3 @@ These are intentionally not finalised yet:
 - final energy-line paths for each game
 - exact copy and CTA text for the homepage sections
 - mobile presentation of the horizontal game list
-

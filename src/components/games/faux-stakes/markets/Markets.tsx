@@ -61,7 +61,7 @@ export const Markets = ({ gameId } : { gameId: string }) => {
 	if (markets && markets?.length < 1) {
 		return (
 			<div className="flex flex-col gap-2">
-				<p className="font-[Space_Grotesk] uppercase text-2xl">Markets</p>
+				<p className=" uppercase text-2xl">Markets</p>
 				<div className="flex flex-col gap-4">
 					<div className="mt-1 rounded-lg border bg-muted px-4 py-3 text-sm text-muted-foreground">
 						<div className="flex gap-1">
@@ -80,7 +80,7 @@ export const Markets = ({ gameId } : { gameId: string }) => {
 	return (
 		<div className="flex flex-col gap-2">
 			<div className="flex justify-between items-center">
-				<p className="font-[Space_Grotesk] uppercase text-2xl">Markets</p>
+				<p className=" uppercase text-2xl">Markets</p>
 				<div className="flex items-center space-x-2">
 					<Switch 
 						id="hide-completed" 
@@ -121,7 +121,7 @@ export const Markets = ({ gameId } : { gameId: string }) => {
 										{ renderBadge(market.status) }
 									</div>
 									<div className="flex flex-col gap-4">
-										<p className="font-[Space_Grotesk] uppercase text-2xl">{ market.name }</p>
+										<p className=" uppercase text-2xl">{ market.name }</p>
 										<SelectionForm selections={market.selections} market={market} gameId={gameId} />
 									</div>
 								</div>

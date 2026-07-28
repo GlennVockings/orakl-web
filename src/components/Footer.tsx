@@ -3,7 +3,7 @@ import { Button } from "./ui/button"
 export const Footer = () => {
 	return (
 		<footer className="mt-24 border-t pt-10 pb-6 max-w-6xl mx-auto flex flex-col gap-4 px-4">
-			<div className="flex items-center justify-between font-[Space_Grotesk] uppercase">
+			<div className="flex items-center justify-between  uppercase">
 				<div>
 					<p>Got an improvement?</p>
 					<p className="text-primary">Let me know</p>

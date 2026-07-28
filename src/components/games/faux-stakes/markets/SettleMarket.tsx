@@ -53,7 +53,7 @@ export const SettleMarket = ({ gameId, market } : { gameId: string, market: Mark
 				</SheetHeader>
 				<form onSubmit={form.handleSubmit(onSubmit)} className="px-4">
 					<div className="pb-2">
-						<p className="font-[Space_Grotesk] uppercase">{ market.name }</p>
+						<p className=" uppercase">{ market.name }</p>
 					</div>
 					<Controller 
 						control={form.control}

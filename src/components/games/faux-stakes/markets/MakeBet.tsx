@@ -66,7 +66,7 @@ export const MakeBet = ({ market, selection, gameId } : { market: Market, select
 					<DrawerDescription>Choose how much to stake?</DrawerDescription>
 				</DrawerHeader>
 				<div className="flex flex-col items-center gap-4">
-					<p className="font-[Space_Grotesk] uppercase text-lg">{ market.name }</p>
+					<p className=" uppercase text-lg">{ market.name }</p>
 					<p>{ selection.label !== null ? selection.label : selection.team?.name }</p>
 					<form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
 						<FieldGroup>
@@ -88,7 +88,7 @@ export const MakeBet = ({ market, selection, gameId } : { market: Market, select
 								)}
 							/>
 						</FieldGroup>
-						<div className="text-center font-[Space_Grotesk] uppercase">
+						<div className="text-center  uppercase">
 							<p className="text-sm">Potential Return:</p>
 							<p className="text-lg tracking-wide text-primary">{ potentialReturn }</p>
 						</div>

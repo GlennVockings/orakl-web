@@ -12,13 +12,13 @@ export default function FauxStakes() {
       <div className="w-96 h-96 bg-primary/5 absolute left-1/2 -translate-x-1/2 blur-3xl rounded-b-full"></div>
       <div className="flex flex-col gap-6 py-6">
         <div>
-          <p className={cn("text-5xl uppercase text-foreground whitespace-nowrap font-[Space_Grotesk]")}>
+          <p className={cn("text-5xl uppercase text-foreground whitespace-nowrap ")}>
             Predict.
           </p>
-          <p className={cn("text-5xl uppercase text-foreground whitespace-nowrap font-[Space_Grotesk]")}>
+          <p className={cn("text-5xl uppercase text-foreground whitespace-nowrap ")}>
             Compete.
           </p>
-          <p className={cn("text-5xl uppercase whitespace-nowrap font-[Space_Grotesk] text-primary")}>
+          <p className={cn("text-5xl uppercase whitespace-nowrap  text-primary")}>
             Climb.
           </p>
         </div>
@@ -41,7 +41,7 @@ export default function FauxStakes() {
           <div className="bg-card text-card-foreground flex flex-col gap-4 rounded-xl p-6 border-l-4 border-primary">
             <div className="flex justify-center flex-col items-start gap-4">
               <Percent color="#2CE6FF" />
-              <p className="uppercase font-[Space_Grotesk] text-lg">Set the odds</p>
+              <p className="uppercase  text-lg">Set the odds</p>
             </div>
             <div>
               <p className="text-sm text-card-foreground/80">
@@ -54,7 +54,7 @@ export default function FauxStakes() {
           <div className="bg-card text-card-foreground flex flex-col gap-4 rounded-xl p-6 border-l-4 border-primary">
             <div className="flex justify-center flex-col items-start gap-4">
               <Trophy color="#2CE6FF" />
-              <p className="uppercase font-[Space_Grotesk] text-lg">Back yourself</p>
+              <p className="uppercase  text-lg">Back yourself</p>
             </div>
             <div>
               <p className="text-sm text-card-foreground/80">
@@ -67,7 +67,7 @@ export default function FauxStakes() {
           <div className="bg-card text-card-foreground flex flex-col gap-4 rounded-xl p-6 border-l-4 border-primary">
             <div className="flex justify-center flex-col items-start gap-4">
               <Shield color="#2CE6FF" />
-              <p className="uppercase font-[Space_Grotesk] text-lg">No real stakes</p>
+              <p className="uppercase  text-lg">No real stakes</p>
             </div>
             <div>
               <p className="text-sm text-card-foreground/80">
@@ -82,7 +82,7 @@ export default function FauxStakes() {
       {/* HOW IT WORKS */}
       <div className="py-6">
         <div className="w-96 h-40 bg-primary/8 absolute left-1/2 -translate-x-1/2 blur-3xl rounded-b-full"></div>
-        <h2 className="text-4xl mb-6 uppercase font-[Space_Grotesk]">How it <span className="text-primary">works</span></h2>
+        <h2 className="text-4xl mb-6 uppercase ">How it <span className="text-primary">works</span></h2>
 
         <div className="h-14 flex gap-4 items-center mb-6">
           <Separator orientation={"vertical"} className="bg-primary" />
@@ -95,7 +95,7 @@ export default function FauxStakes() {
               <UserPlus color="#0C0D1B" />
             </ItemMedia>
             <ItemContent className="gap-2">
-              <p className="text-primary uppercase font-[Space_Grotesk] text-xs">Step 01</p>
+              <p className="text-primary uppercase  text-xs">Step 01</p>
               <ItemTitle>Join a League</ItemTitle>
               <ItemDescription>Create one with friends or jump into an existing game. The more opinions, the better.</ItemDescription>
             </ItemContent>
@@ -106,7 +106,7 @@ export default function FauxStakes() {
               <HandCoins color="#0C0D1B" />
             </ItemMedia>
             <ItemContent className="gap-2">
-              <p className="text-primary uppercase font-[Space_Grotesk] text-xs">Step 02</p>
+              <p className="text-primary uppercase  text-xs">Step 02</p>
               <ItemTitle>Get Your Chips</ItemTitle>
               <ItemDescription>
                 Everyone starts with the same stack.
@@ -120,7 +120,7 @@ export default function FauxStakes() {
               <TrendingUpDown color="#0C0D1B" />
             </ItemMedia>
             <ItemContent className="gap-2">
-              <p className="text-primary uppercase font-[Space_Grotesk] text-xs">Step 03</p>
+              <p className="text-primary uppercase  text-xs">Step 03</p>
               <ItemTitle>Make Your Picks</ItemTitle>
               <ItemDescription>
                 Choose an outcome, back it with chips, and lock it in.
@@ -134,7 +134,7 @@ export default function FauxStakes() {
               <TrendingUpDown color="#0C0D1B" />
             </ItemMedia>
             <ItemContent className="gap-2">
-              <p className="text-primary uppercase font-[Space_Grotesk] text-xs">Step 04</p>
+              <p className="text-primary uppercase  text-xs">Step 04</p>
               <ItemTitle>Watch It Play Out</ItemTitle>
               <ItemDescription>
                 When results come in, chips move and the table updates.
@@ -146,7 +146,7 @@ export default function FauxStakes() {
       </div>
 
       <div className="bg-accent mt-6 py-8 text-center rounded-md">
-        <h2 className="text-3xl uppercase font-[Space_Grotesk] mb-4">
+        <h2 className="text-3xl uppercase  mb-4">
           Ready to <span className="text-accent-foreground">prove it?</span>
         </h2>
         <Button size="lg">Start a League</Button>

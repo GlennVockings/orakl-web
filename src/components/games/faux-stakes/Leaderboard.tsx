@@ -57,7 +57,7 @@ export const Leaderboard = ({ gameId } : { gameId: string }) => {
 										{
 											leaderboard?.map((entry) => (
 												<div key={entry.userId} className="bg-accent flex items-center py-4 px-2 rounded-md">
-													<div className="font-[Space_Grotesk] pr-3 flex gap-1 items-center">
+													<div className=" pr-3 flex gap-1 items-center">
 														{ renderDelta(entry.rankDelta || 0) }
 														<p className="text-2xl leading-none">{ String(entry.rank).padStart(2, "0") }</p>
 													</div>
@@ -79,7 +79,7 @@ export const Leaderboard = ({ gameId } : { gameId: string }) => {
 										{
 											leaderboard?.map((entry) => (
 												<div key={entry.userId} className="bg-accent flex items-center p-4 rounded-md">
-													<div className="font-[Space_Grotesk] pr-6">
+													<div className=" pr-6">
 														<User />
 													</div>
 													<div className="flex-grow text-white font-bold">
@@ -99,7 +99,7 @@ export const Leaderboard = ({ gameId } : { gameId: string }) => {
 				</Sheet>
 			</div>
 			<div className="hidden md:block">
-				<p className="text-lg font-[Space_Grotesk] uppercase">Leaderboard</p>
+				<p className="text-lg  uppercase">Leaderboard</p>
 				<Tabs defaultValue="settledBalance" className="py-4 gap-4">
 					<TabsList className="bg-accent">
 						<TabsTrigger value="settledBalance">Leaderboard</TabsTrigger>
@@ -111,7 +111,7 @@ export const Leaderboard = ({ gameId } : { gameId: string }) => {
 								{
 									leaderboard?.map((entry) => (
 										<div key={entry.userId} className="bg-accent flex items-center p-4 rounded-md">
-											<div className="font-[Space_Grotesk] pr-5">
+											<div className=" pr-5">
 												<p className="text-2xl">{ String(entry.rank).padStart(2, "0") }</p>
 											</div>
 											<div className="flex-grow text-white font-bold">
@@ -132,7 +132,7 @@ export const Leaderboard = ({ gameId } : { gameId: string }) => {
 								{
 									leaderboard?.map((entry) => (
 										<div key={entry.userId} className="bg-accent flex items-center p-4 rounded-md">
-											<div className="font-[Space_Grotesk] pr-6">
+											<div className=" pr-6">
 												<User />
 											</div>
 											<div className="flex-grow text-white font-bold">

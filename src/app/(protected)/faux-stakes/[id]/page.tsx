@@ -27,7 +27,7 @@ export default async function Game({
 			<div className="flex flex-col gap-4 lg:col-span-2">
 				<Markets gameId={id} />
 				<div>
-					<p className="font-[Space_Grotesk] uppercase text-2xl">Stakes</p>
+					<p className=" uppercase text-2xl">Stakes</p>
 					<BetsList gameId={id} />
 				</div>
 			</div>

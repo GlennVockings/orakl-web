@@ -16,7 +16,7 @@ export default function Account() {
           <LogOutDialog />
         </div>
         <div className="col-span-3 flex flex-col gap-4">
-          <p className="text-2xl font-[Space_Grotesk] uppercase">Games</p>
+          <p className="text-2xl  uppercase">Games</p>
             <GamesList />
           <div className="flex gap-4">
             <CreateGameDialog />
