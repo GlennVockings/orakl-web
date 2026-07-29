@@ -1,3 +1,5 @@
+import { HeroEnergyLine } from "./HeroEnergyLine";
+
 const features = [
   {
     title: "One identity",
@@ -18,7 +20,7 @@ const features = [
 
 export function PlatformSection() {
   return (
-    <section className="py-24 sm:py-32 bg-surface">
+    <section className="relative py-24 sm:py-32 bg-surface">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="grid gap-16 lg:grid-cols-[0.8fr_1.2fr]">
           <div>
@@ -36,7 +38,7 @@ export function PlatformSection() {
             </p>
           </div>
 
-          <div className="grid gap-px overflow-hidden rounded-2xl border bg-border lg:grid-cols-3">
+          <div className="grid gap-px overflow-hidden rounded-2xl border z-50 bg-border lg:grid-cols-3">
             {features.map((feature) => (
               <article key={feature.title} className="bg-background p-8">
                 <h3 className="text-xl font-semibold">{feature.title}</h3>
@@ -49,6 +51,8 @@ export function PlatformSection() {
           </div>
         </div>
       </div>
+      
+      <HeroEnergyLine />
     </section>
   );
 }

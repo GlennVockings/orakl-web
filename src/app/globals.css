@@ -217,6 +217,22 @@
   );
 }
 
+@keyframes energy-pulse {
+  from {
+    stroke-dashoffset: 100;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-energy-pulse {
+    animation: none;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -263,5 +279,9 @@
 
   .surface-panel {
     @apply rounded-lg border bg-background text-card-foreground shadow-xs;
+  }
+
+  .animate-energy-pulse {
+    animation: energy-pulse 1.6s linear infinite;
   }
 }

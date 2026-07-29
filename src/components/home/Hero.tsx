@@ -3,10 +3,13 @@ import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { OraklMark } from "../brand"
 import { PageContainer } from "../layout"
+import { HeroEnergyLine } from "./HeroEnergyLine"
 
 export const HomeHero = () => {
   return (
     <section className="relative overflow-hidden border-b bg-surface py-20 sm:py-28">
+      <HeroEnergyLine />
+      
       <PageContainer className="relative flex flex-col items-start gap-12 lg:flex-row lg:items-center lg:justify-between">
         <div className="max-w-3xl">
           <p className="mb-5 text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">

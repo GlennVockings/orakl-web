@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ActiveGame } from "./home.types";
+import { GameCardEnergy } from "./GameCardEnergy";
 
 type GameCardProps = {
   name: string;
@@ -38,6 +39,8 @@ export function GameCard({
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
       ].join(" ")}
     >
+      <GameCardEnergy active={active} />
+      
       <div className="absolute inset-x-0 top-0 h-1 origin-left scale-x-75 bg-primary transition-transform duration-300 group-hover:scale-x-100 group-focus-visible:scale-x-100" />
 
       <div className="flex items-center justify-between">
