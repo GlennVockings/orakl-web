@@ -1,6 +1,15 @@
 import { GameCard } from "./GameCard";
+import type { ActiveGame } from "./home.types";
 
-export function GameShowcase() {
+type GameShowcaseProps = {
+  activeGame: ActiveGame;
+  onActiveGameChange: (game: ActiveGame) => void;
+};
+
+export function GameShowcase({
+  activeGame,
+  onActiveGameChange,
+}: GameShowcaseProps) {
   return (
     <section className="bg-background py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
@@ -20,6 +29,8 @@ export function GameShowcase() {
             description="Make your calls, follow the action and compete against the people who know you best."
             href="/predictor"
             product="predictor"
+            active={activeGame === "predictor"}
+            onActiveChange={onActiveGameChange}
           />
 
           <GameCard
@@ -27,6 +38,8 @@ export function GameShowcase() {
             description="Create markets around the moments that matter and prove who really knows what happens next."
             href="/faux-stakes"
             product="faux-stakes"
+            active={activeGame === "faux-stakes"}
+            onActiveChange={onActiveGameChange}
           />
         </div>
       </div>

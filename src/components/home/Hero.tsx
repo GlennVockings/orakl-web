@@ -1,7 +1,8 @@
-import { OraklMark, PageContainer } from "@/components"
 import { Button } from "@/components/ui/button"
 import { ArrowRight } from "lucide-react"
 import Link from "next/link"
+import { OraklMark } from "../brand"
+import { PageContainer } from "../layout"
 
 export const HomeHero = () => {
   return (
@@ -29,7 +30,7 @@ export const HomeHero = () => {
           </div>
         </div>
         <div className="flex w-full justify-center lg:w-auto">
-          <OraklMark className="h-48 w-48 sm:h-64 sm:w-64" />
+          <OraklMark className="h-48 w-48 sm:h-64 sm:w-64 text-brand" />
         </div>
       </PageContainer>
     </section>

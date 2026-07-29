@@ -1,14 +1,5 @@
-import { GameShowcase, HomeHero, PlatformSection } from "@/components";
+import { HomeExperience } from "@/components";
 
 export default function Home() {
-  return (
-    <div data-product="platform">
-      <HomeHero />
-
-      <GameShowcase />
-      
-      <PlatformSection />
-
-    </div>
-  );
+  return <HomeExperience/>;
 }

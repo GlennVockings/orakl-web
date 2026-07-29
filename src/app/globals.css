@@ -71,6 +71,8 @@
   --shadow-sm: var(--shadow-sm-value);
   --shadow-md: var(--shadow-md-value);
   --shadow-lg: var(--shadow-lg-value);
+
+  --color-home-wash: var(--home-wash);
 }
 
 :root {
@@ -164,6 +166,8 @@
   --sidebar-accent-foreground: var(--orakl-charcoal);
   --sidebar-border: var(--orakl-stone-200);
   --sidebar-ring: var(--brand);
+
+  --home-wash: var(--orakl-white);
 }
 
 /*
@@ -185,6 +189,11 @@
   --sidebar-accent-foreground: #003ca8;
   --sidebar-ring: var(--orakl-signal-blue);
   --chart-1: var(--orakl-signal-blue);
+  --home-wash: color-mix(
+    in srgb,
+    var(--orakl-signal-blue) 8%,
+    var(--orakl-white)
+  );
 }
 
 [data-product="faux-stakes"] {
@@ -201,6 +210,11 @@
   --sidebar-accent-foreground: #9f2f0c;
   --sidebar-ring: var(--orakl-faux-stakes);
   --chart-1: var(--orakl-faux-stakes);
+  --home-wash: color-mix(
+    in srgb,
+    var(--orakl-faux-stakes) 8%,
+    var(--orakl-white)
+  );
 }
 
 @layer base {
