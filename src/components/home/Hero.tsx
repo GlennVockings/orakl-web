@@ -6,7 +6,7 @@ import Link from "next/link"
 export const HomeHero = () => {
   return (
     <section className="relative overflow-hidden border-b bg-surface py-20 sm:py-28">
-      <PageContainer className="relative flex items-center">
+      <PageContainer className="relative flex flex-col items-start gap-12 lg:flex-row lg:items-center lg:justify-between">
         <div className="max-w-3xl">
           <p className="mb-5 text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             Social competition, made simple
@@ -28,8 +28,8 @@ export const HomeHero = () => {
             </Button>
           </div>
         </div>
-        <div>
-          <OraklMark className="h-64 w-64" />
+        <div className="flex w-full justify-center lg:w-auto">
+          <OraklMark className="h-48 w-48 sm:h-64 sm:w-64" />
         </div>
       </PageContainer>
     </section>

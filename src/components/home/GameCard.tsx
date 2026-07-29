@@ -19,7 +19,7 @@ export function GameCard({
     <Link
       href={href}
       data-product={product}
-      className="group relative flex min-h-96 flex-col overflow-hidden rounded-2xl border bg-card p-8 shadow-sm transition-transform duration-200 hover:-translate-y-1 hover:shadow-md"
+      className="group relative flex min-h-96 flex-col overflow-hidden rounded-2xl border bg-card p-8 shadow-sm transition-transform duration-200 hover:-translate-y-1 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
     >
       <div className="absolute inset-x-0 top-0 h-1 bg-primary" />
 

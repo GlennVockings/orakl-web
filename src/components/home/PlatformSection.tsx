@@ -36,7 +36,7 @@ export function PlatformSection() {
             </p>
           </div>
 
-          <div className="grid gap-px overflow-hidden rounded-2xl border bg-border sm:grid-cols-3">
+          <div className="grid gap-px overflow-hidden rounded-2xl border bg-border lg:grid-cols-3">
             {features.map((feature) => (
               <article key={feature.title} className="bg-background p-8">
                 <h3 className="text-xl font-semibold">{feature.title}</h3>
