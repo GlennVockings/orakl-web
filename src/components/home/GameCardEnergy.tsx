@@ -1,6 +1,11 @@
-"use client"
+"use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import {
+    useEffect,
+    useId,
+    useRef,
+    useState,
+} from "react";
 
 type GameCardEnergyProps = {
     active: boolean;
@@ -16,19 +21,27 @@ const ENERGY_PATH =
 
 const NODE_POSITIONS = [0.25, 0.5, 0.75];
 
-const PULSE_DURATION = "1.1s";
+const PULSE_DURATION_MS = 1000;
 
 export default function GameCardEnergy({
     active,
 }: GameCardEnergyProps) {
     const pathRef = useRef<SVGPathElement>(null);
+    const animationFrameRef = useRef<number | null>(null);
 
     const [nodePoints, setNodePoints] = useState<Point[]>([]);
+    const [pulsePoint, setPulsePoint] = useState<Point | null>(
+        null
+    );
+    const [pulseOpacity, setPulseOpacity] = useState(0);
 
     const uniqueId = useId().replace(/:/g, "");
-    const pathId = `game-card-energy-path-${uniqueId}`;
     const glowId = `game-card-energy-glow-${uniqueId}`;
 
+    /**
+     * Calculate the fixed node positions once the SVG path
+     * exists in the browser.
+     */
     useEffect(() => {
         const path = pathRef.current;
 
@@ -52,8 +65,112 @@ export default function GameCardEnergy({
         setNodePoints(points);
     }, []);
 
+    /**
+     * Run one pulse from the beginning to the end of the path
+     * whenever the card becomes active.
+     */
+    useEffect(() => {
+        const path = pathRef.current;
+
+        if (animationFrameRef.current !== null) {
+            cancelAnimationFrame(animationFrameRef.current);
+            animationFrameRef.current = null;
+        }
+
+        if (!active || !path) {
+            setPulsePoint(null);
+            setPulseOpacity(0);
+            return;
+        }
+
+        const prefersReducedMotion =
+            window.matchMedia(
+                "(prefers-reduced-motion: reduce)"
+            ).matches;
+
+        if (prefersReducedMotion) {
+            return;
+        }
+
+        const totalLength = path.getTotalLength();
+        const startedAt = performance.now();
+
+        const animatePulse = (currentTime: number) => {
+            const elapsed = currentTime - startedAt;
+
+            const rawProgress = Math.min(
+                elapsed / PULSE_DURATION_MS,
+                1
+            );
+
+            /**
+             * Ease out:
+             * fast at the start, slightly softer near the end.
+             */
+            const easedProgress =
+                1 - Math.pow(1 - rawProgress, 3);
+
+            const point = path.getPointAtLength(
+                totalLength * easedProgress
+            );
+
+            /**
+             * Fade in during the first 10% and fade out
+             * during the final 15%.
+             */
+            let opacity = 1;
+
+            if (rawProgress < 0.1) {
+                opacity = rawProgress / 0.1;
+            } else if (rawProgress > 0.85) {
+                opacity =
+                    1 - (rawProgress - 0.85) / 0.15;
+            }
+
+            setPulsePoint({
+                x: point.x,
+                y: point.y,
+            });
+
+            setPulseOpacity(Math.max(0, opacity));
+
+            if (rawProgress < 1) {
+                animationFrameRef.current =
+                    requestAnimationFrame(animatePulse);
+            } else {
+                setPulsePoint(null);
+                setPulseOpacity(0);
+                animationFrameRef.current = null;
+            }
+        };
+
+        animationFrameRef.current =
+            requestAnimationFrame(animatePulse);
+
+        return () => {
+            if (animationFrameRef.current !== null) {
+                cancelAnimationFrame(
+                    animationFrameRef.current
+                );
+
+                animationFrameRef.current = null;
+            }
+        };
+    }, [active]);
+
     return (
-        <div className="pointer-events-none absolute inset-x-0 top-[38%] -translate-y-1/2 overflow-visible text-primary" aria-hidden="true">
+        <div
+            className="
+                pointer-events-none
+                absolute
+                inset-x-0
+                top-[32%]
+                -translate-y-1/2
+                overflow-visible
+                text-primary
+            "
+            aria-hidden="true"
+        >
             <svg
                 className="block h-auto w-full overflow-visible"
                 viewBox="0 0 600 110"
@@ -79,10 +196,9 @@ export default function GameCardEnergy({
                     </filter>
                 </defs>
 
-                {/* Permanent brand-colour line */}
+                {/* Permanent energy line */}
                 <path
                     ref={pathRef}
-                    id={pathId}
                     d={ENERGY_PATH}
                     fill="none"
                     stroke="currentColor"
@@ -92,7 +208,7 @@ export default function GameCardEnergy({
                     opacity="0.7"
                 />
 
-                {/* Permanent round nodes */}
+                {/* Permanent nodes */}
                 {nodePoints.map((point, index) => (
                     <g
                         key={NODE_POSITIONS[index]}
@@ -107,89 +223,44 @@ export default function GameCardEnergy({
                         <circle
                             r="1.5"
                             fill="currentColor"
-                            opacity="1"
                         />
                     </g>
                 ))}
 
-                {/* One travelling pulse per hover */}
-                {active && (
-                    <g className="motion-reduce:hidden">
-                        {/* Wide outer glow */}
+                {/* Travelling pulse */}
+                {pulsePoint && (
+                    <g
+                        transform={`translate(${pulsePoint.x} ${pulsePoint.y})`}
+                        opacity={pulseOpacity}
+                    >
+                        {/* Large soft bloom */}
                         <circle
-                            r="10"
+                            r="11"
                             fill="currentColor"
-                            opacity="0.15"
+                            opacity="0.16"
                             filter={`url(#${glowId})`}
-                        >
-                            <animateMotion
-                                begin="0s"
-                                dur={PULSE_DURATION}
-                                repeatCount="1"
-                                fill="remove"
-                                rotate="auto"
-                            >
-                                <mpath href={`#${pathId}`} />
-                            </animateMotion>
-
-                            <animate
-                                attributeName="opacity"
-                                values="0;0.2;0.2;0"
-                                keyTimes="0;0.08;0.88;1"
-                                dur={PULSE_DURATION}
-                                repeatCount="1"
-                            />
-                        </circle>
+                        />
 
                         {/* Concentrated glow */}
                         <circle
                             r="6"
                             fill="currentColor"
-                            opacity="0.3"
+                            opacity="0.32"
                             filter={`url(#${glowId})`}
-                        >
-                            <animateMotion
-                                begin="0s"
-                                dur={PULSE_DURATION}
-                                repeatCount="1"
-                                fill="remove"
-                                rotate="auto"
-                            >
-                                <mpath href={`#${pathId}`} />
-                            </animateMotion>
+                        />
 
-                            <animate
-                                attributeName="opacity"
-                                values="0;0.35;0.35;0"
-                                keyTimes="0;0.08;0.88;1"
-                                dur={PULSE_DURATION}
-                                repeatCount="1"
-                            />
-                        </circle>
-
-                        {/* Bright travelling core */}
+                        {/* Bright packet core */}
                         <circle
                             r="3"
                             fill="currentColor"
-                        >
-                            <animateMotion
-                                begin="0s"
-                                dur={PULSE_DURATION}
-                                repeatCount="1"
-                                fill="remove"
-                                rotate="auto"
-                            >
-                                <mpath href={`#${pathId}`} />
-                            </animateMotion>
+                        />
 
-                            <animate
-                                attributeName="opacity"
-                                values="0;1;1;0"
-                                keyTimes="0;0.05;0.92;1"
-                                dur={PULSE_DURATION}
-                                repeatCount="1"
-                            />
-                        </circle>
+                        {/* Small white-hot centre */}
+                        <circle
+                            r="1.25"
+                            fill="white"
+                            opacity="0.9"
+                        />
                     </g>
                 )}
             </svg>
