@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ActiveGame } from "./home.types";
-import { GameCardEnergy } from "./GameCardEnergy";
+import GameCardEnergy  from "./GameCardEnergy";
 
 type GameCardProps = {
   name: string;

@@ -1,147 +1,198 @@
-"use client";
+"use client"
 
 import { useEffect, useId, useRef, useState } from "react";
 
+type GameCardEnergyProps = {
+    active: boolean;
+};
+
+type Point = {
+    x: number;
+    y: number;
+};
+
 const ENERGY_PATH =
-  "M -20 105 C 100 105, 120 45, 250 45 S 420 105, 620 55";
+    "M -20 78 C 100 78, 120 30, 250 30 S 420 78, 620 38";
 
 const NODE_POSITIONS = [0.25, 0.5, 0.75];
 
-type Point = {
-  x: number;
-  y: number;
-};
+const PULSE_DURATION = "1.1s";
 
-type GameCardEnergyProps = {
-  active: boolean;
-};
+export default function GameCardEnergy({
+    active,
+}: GameCardEnergyProps) {
+    const pathRef = useRef<SVGPathElement>(null);
 
-export function GameCardEnergy({ active }: GameCardEnergyProps) {
-  const pathRef = useRef<SVGPathElement>(null);
-  const [nodePoints, setNodePoints] = useState<Point[]>([]);
+    const [nodePoints, setNodePoints] = useState<Point[]>([]);
 
-  // Prevent duplicate SVG filter IDs when multiple cards are rendered.
-  const filterId = useId().replaceAll(":", "");
+    const uniqueId = useId().replace(/:/g, "");
+    const pathId = `game-card-energy-path-${uniqueId}`;
+    const glowId = `game-card-energy-glow-${uniqueId}`;
 
-  useEffect(() => {
-    const path = pathRef.current;
+    useEffect(() => {
+        const path = pathRef.current;
 
-    if (!path) {
-      return;
-    }
+        if (!path) {
+            return;
+        }
 
-    const totalLength = path.getTotalLength();
+        const totalLength = path.getTotalLength();
 
-    const points = NODE_POSITIONS.map((position) => {
-      const point = path.getPointAtLength(totalLength * position);
+        const points = NODE_POSITIONS.map((position) => {
+            const point = path.getPointAtLength(
+                totalLength * position
+            );
 
-      return {
-        x: point.x,
-        y: point.y,
-      };
-    });
+            return {
+                x: point.x,
+                y: point.y,
+            };
+        });
 
-    setNodePoints(points);
-  }, []);
+        setNodePoints(points);
+    }, []);
 
-  return (
-    <div
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-x-0 top-16 h-32 overflow-hidden"
-    >
-      <svg
-        viewBox="0 0 600 140"
-        preserveAspectRatio="none"
-        className="h-full w-full"
-      >
-        <defs>
-          <filter
-            id={filterId}
-            x="-30%"
-            y="-30%"
-            width="160%"
-            height="160%"
-          >
-            <feGaussianBlur stdDeviation="4" result="blur" />
+    return (
+        <div className="pointer-events-none absolute inset-x-0 top-[38%] -translate-y-1/2 overflow-visible text-primary" aria-hidden="true">
+            <svg
+                className="block h-auto w-full overflow-visible"
+                viewBox="0 0 600 110"
+                preserveAspectRatio="xMidYMid meet"
+            >
+                <defs>
+                    <filter
+                        id={glowId}
+                        x="-200%"
+                        y="-200%"
+                        width="400%"
+                        height="400%"
+                    >
+                        <feGaussianBlur
+                            stdDeviation="4"
+                            result="blur"
+                        />
 
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
+                        <feMerge>
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
+                </defs>
 
-        {/* Faint line that is always visible */}
-        <path
-          ref={pathRef}
-          d={ENERGY_PATH}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          className="text-border"
-        />
+                {/* Permanent brand-colour line */}
+                <path
+                    ref={pathRef}
+                    id={pathId}
+                    d={ENERGY_PATH}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    opacity="0.7"
+                />
 
-        {/* Active product-coloured line */}
-        <path
-          d={ENERGY_PATH}
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          pathLength="1"
-          filter={active ? `url(#${filterId})` : undefined}
-          className={[
-            "text-primary transition-[opacity,stroke-dashoffset] duration-700 ease-out",
-            "[stroke-dasharray:1]",
-            active
-              ? "opacity-100 [stroke-dashoffset:0]"
-              : "opacity-0 [stroke-dashoffset:1]",
-          ].join(" ")}
-        />
+                {/* Permanent round nodes */}
+                {nodePoints.map((point, index) => (
+                    <g
+                        key={NODE_POSITIONS[index]}
+                        transform={`translate(${point.x} ${point.y})`}
+                    >
+                        <circle
+                            r="4"
+                            fill="currentColor"
+                            opacity="0.9"
+                        />
 
-        {nodePoints.map((point, index) => (
-          <EnergyNode
-            key={NODE_POSITIONS[index]}
-            x={point.x}
-            y={point.y}
-            active={active}
-            delay={`${index * 100}ms`}
-          />
-        ))}
-      </svg>
-    </div>
-  );
-}
+                        <circle
+                            r="1.5"
+                            fill="currentColor"
+                            opacity="1"
+                        />
+                    </g>
+                ))}
 
-type EnergyNodeProps = {
-  x: number;
-  y: number;
-  active: boolean;
-  delay: string;
-};
+                {/* One travelling pulse per hover */}
+                {active && (
+                    <g className="motion-reduce:hidden">
+                        {/* Wide outer glow */}
+                        <circle
+                            r="10"
+                            fill="currentColor"
+                            opacity="0.15"
+                            filter={`url(#${glowId})`}
+                        >
+                            <animateMotion
+                                begin="0s"
+                                dur={PULSE_DURATION}
+                                repeatCount="1"
+                                fill="remove"
+                                rotate="auto"
+                            >
+                                <mpath href={`#${pathId}`} />
+                            </animateMotion>
 
-function EnergyNode({ x, y, active, delay }: EnergyNodeProps) {
-  return (
-    <g
-      style={{
-        transformOrigin: `${x}px ${y}px`,
-        transitionDelay: delay,
-      }}
-      className={[
-        "text-primary transition-[opacity,transform] duration-500",
-        active ? "scale-100 opacity-100" : "scale-75 opacity-30",
-      ].join(" ")}
-    >
-      <circle
-        cx={x}
-        cy={y}
-        r="9"
-        fill="currentColor"
-        className={active ? "opacity-15" : "opacity-0"}
-      />
+                            <animate
+                                attributeName="opacity"
+                                values="0;0.2;0.2;0"
+                                keyTimes="0;0.08;0.88;1"
+                                dur={PULSE_DURATION}
+                                repeatCount="1"
+                            />
+                        </circle>
 
-      <circle cx={x} cy={y} r="3.5" fill="currentColor" />
-    </g>
-  );
+                        {/* Concentrated glow */}
+                        <circle
+                            r="6"
+                            fill="currentColor"
+                            opacity="0.3"
+                            filter={`url(#${glowId})`}
+                        >
+                            <animateMotion
+                                begin="0s"
+                                dur={PULSE_DURATION}
+                                repeatCount="1"
+                                fill="remove"
+                                rotate="auto"
+                            >
+                                <mpath href={`#${pathId}`} />
+                            </animateMotion>
+
+                            <animate
+                                attributeName="opacity"
+                                values="0;0.35;0.35;0"
+                                keyTimes="0;0.08;0.88;1"
+                                dur={PULSE_DURATION}
+                                repeatCount="1"
+                            />
+                        </circle>
+
+                        {/* Bright travelling core */}
+                        <circle
+                            r="3"
+                            fill="currentColor"
+                        >
+                            <animateMotion
+                                begin="0s"
+                                dur={PULSE_DURATION}
+                                repeatCount="1"
+                                fill="remove"
+                                rotate="auto"
+                            >
+                                <mpath href={`#${pathId}`} />
+                            </animateMotion>
+
+                            <animate
+                                attributeName="opacity"
+                                values="0;1;1;0"
+                                keyTimes="0;0.05;0.92;1"
+                                dur={PULSE_DURATION}
+                                repeatCount="1"
+                            />
+                        </circle>
+                    </g>
+                )}
+            </svg>
+        </div>
+    );
 }
