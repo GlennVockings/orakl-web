@@ -1,55 +1,60 @@
+import { PageContainer } from "@/components";
 import { Button } from "@/components/ui/button";
 import { Item, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@/components/ui/item";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
 import { HandCoins, Percent, Shield, TrendingUpDown, Trophy, UserPlus } from "lucide-react";
 
 export default function FauxStakes() {
   return (
-    <div className="my-10" data-product="faux-stakes">
+    <div data-product="faux-stakes">
 
       {/* Hero */}
-      <div className="w-96 h-96 bg-primary/5 absolute left-1/2 -translate-x-1/2 blur-3xl rounded-b-full"></div>
-      <div className="flex flex-col gap-6 py-6">
-        <div>
-          <p className={cn("text-5xl uppercase text-foreground whitespace-nowrap ")}>
-            Predict.
-          </p>
-          <p className={cn("text-5xl uppercase text-foreground whitespace-nowrap ")}>
-            Compete.
-          </p>
-          <p className={cn("text-5xl uppercase whitespace-nowrap  text-primary")}>
-            Climb.
-          </p>
-        </div>
+      <section className="relative overflow-hidden border-b bg-surface py-20 sm:py-28">
+        <PageContainer className="flex flex-col gap-6">
+          <div className="max-w-3xl">
+            <h1 className="text-balance text-5xl font-semibold tracking-[-0.055em] sm:text-7xl">
+              Predict. Compete. <span className="text-primary">Connect.</span>
+            </h1>
+          </div>
 
-        <p className="max-w-xl text-muted-foreground text-lg">
-          Make predictions. Set ridiculous odds. Prove you were right. A fake-stakes game built for friends, chaos, and bragging rights.
-        </p>
+          <p className="max-w-xl text-muted-foreground text-lg">
+            Make predictions. Set ridiculous odds. Prove you were right. A fake-stakes game built for friends, chaos, and bragging rights.
+          </p>
 
-        <div className="gap-4 hidden md:flex">
-          <Button size="lg">Create a League</Button>
-        </div>
+          <div className="gap-4 hidden md:flex">
+            <Button size="lg">Create a League</Button>
+          </div>
 
-        <Button size="xl" className="w-full md:hidden">Create a League</Button>
-      </div>
+          <Button size="xl" className="w-full md:hidden">Create a League</Button>
+        </PageContainer>
+      </section>
 
       {/* Carousel / Info Cards */}
-      <div className="py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <section className="bg-background py-24 sm:py-32">
+        <PageContainer className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          
           {/* Card */}
-          <div className="bg-card text-card-foreground flex flex-col gap-4 rounded-xl p-6 border-l-4 border-primary">
-            <div className="flex justify-center flex-col items-start gap-4">
-              <Percent color="#2CE6FF" />
-              <p className="uppercase  text-lg">Set the odds</p>
-            </div>
-            <div>
-              <p className="text-sm text-card-foreground/80">
+          <div 
+            className={[
+              "group relative flex min-h-96 flex-col overflow-hidden rounded-2xl border p-8",
+              "bg-card shadow-sm",
+              "transition-[transform,background-color,border-color,box-shadow] duration-300",
+              "hover:-translate-y-1 hover:border-primary/40 hover:bg-accent hover:shadow-md",
+              "focus-visible:-translate-y-1 focus-visible:border-primary/40 focus-visible:bg-accent",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
+            ].join(" ")}
+          >
+            {/* <div className="absolute inset-x-0 top-0 left-1/2 h-1 origin-left scale-x-0 bg-primary transition-all duration-300 group-hover:scale-x-100 group-hover:left-0 group-focus-visible:scale-x-100" /> */}
+            
+            <div className="mt-auto">
+              <h3 className="text-3xl font-semibold tracking-tight">Set the odds</h3>
+              <p className="mt-4 max-w-md leading-7 text-muted-foreground transition-colors duration-300 group-hover:text-foreground group-focus-visible:text-foreground">
                 Decide the outcomes, make the lines fair or completely unhinged.
                 Your league, your rules.
               </p>
             </div>
           </div>
+          
           {/* Card */}
           <div className="bg-card text-card-foreground flex flex-col gap-4 rounded-xl p-6 border-l-4 border-primary">
             <div className="flex justify-center flex-col items-start gap-4">
@@ -76,8 +81,8 @@ export default function FauxStakes() {
               </p>
             </div>
           </div>
-        </div>
-      </div>
+        </PageContainer>
+      </section>
 
       {/* HOW IT WORKS */}
       <div className="py-6">

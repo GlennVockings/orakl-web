@@ -4,7 +4,7 @@ import { AccountButton } from "./AccountButton";
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-100 border-b bg-background/90 backdrop-blur-xl">
       <PageContainer className="flex h-16 items-center justify-between">
         <OraklLogo />
         <div className="flex items-center gap-2">

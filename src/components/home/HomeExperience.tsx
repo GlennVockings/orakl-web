@@ -2,10 +2,13 @@
 
 import { useState } from "react";
 
+import { KnowledgeVoid } from "@/components/flow/KnowledgeVoid";
+
 import { GameShowcase } from "./GameShowcase";
 import { HomeHero } from "./Hero";
 import { PlatformSection } from "./PlatformSection";
 import type { ActiveGame, HomeProduct } from "./home.types";
+import { KnowledgeNode } from "../flow/KnowledgeNode";
 
 export function HomeExperience() {
   const [activeGame, setActiveGame] = useState<ActiveGame>(null);
@@ -15,16 +18,26 @@ export function HomeExperience() {
   return (
     <div
       data-product={activeProduct}
-      className="bg-home-wash transition-colors duration-300"
+      className="
+        bg-home-wash
+        transition-colors
+        duration-500
+      "
     >
       <HomeHero />
 
-      <GameShowcase
-        activeGame={activeGame}
-        onActiveGameChange={setActiveGame}
-      />
+      <KnowledgeVoid>
+        <KnowledgeNode side="right">
+          <GameShowcase
+            activeGame={activeGame}
+            onActiveGameChange={setActiveGame}
+          />
+        </KnowledgeNode>
 
-      <PlatformSection />
+        <KnowledgeNode side="left">
+          <PlatformSection />
+        </KnowledgeNode>
+      </KnowledgeVoid>
     </div>
   );
 }

@@ -3,14 +3,14 @@ import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { OraklMark } from "../brand"
 import { PageContainer } from "../layout"
-import { HeroEnergyLine } from "./HeroEnergyLine"
+import { HeroEnergyField } from "./HeroEnergyField"
 
 export const HomeHero = () => {
   return (
-    <section className="relative overflow-hidden border-b bg-surface py-20 sm:py-28">
-      <HeroEnergyLine />
+    <section className="relative isolate overflow-hidden border-b bg-surface py-20 sm:py-28">
+      <HeroEnergyField className="-z-10" />
       
-      <PageContainer className="relative flex flex-col items-start gap-12 lg:flex-row lg:items-center lg:justify-between">
+      <PageContainer className="relative flex flex-col items-start gap-12 z-10 lg:flex-row lg:items-center lg:justify-between">
         <div className="max-w-3xl">
           <p className="mb-5 text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
             Social competition, made simple

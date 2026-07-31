@@ -231,6 +231,10 @@
   .animate-energy-pulse {
     animation: none;
   }
+
+  .hero-energy-field animate {
+    display: none;
+  }
 }
 
 @layer base {
