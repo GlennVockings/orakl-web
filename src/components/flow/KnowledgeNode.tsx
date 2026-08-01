@@ -20,15 +20,19 @@ export function KnowledgeNode({
         group/station
         relative
         mx-auto
+        flex
+        min-h-[100svh]
         max-w-7xl
+        items-center
         px-6
-        py-32
+        py-24
         lg:px-8
+        lg:py-32
       "
     >
       <div
         className={[
-          "grid gap-10 lg:items-start",
+          "grid w-full gap-10 lg:items-center",
           contentOnRight
             ? "lg:grid-cols-[12rem_minmax(0,1fr)]"
             : "lg:grid-cols-[minmax(0,1fr)_12rem]",
@@ -94,15 +98,16 @@ type StreamRailProps = {
 
 function StreamRail({ side }: StreamRailProps) {
   return (
-    <div className="relative hidden min-h-32 lg:block">
+    <div className="relative hidden min-h-40 self-stretch lg:block">
       <div
         data-knowledge-node
         className="
           absolute
           left-1/2
-          top-12
+          top-1/2
           z-10
           -translate-x-1/2
+          -translate-y-1/2
         "
       >
         <StreamNode />
@@ -112,7 +117,7 @@ function StreamRail({ side }: StreamRailProps) {
         data-knowledge-branch
         aria-hidden="true"
         className={[
-          "absolute top-[3.75rem] h-px",
+          "absolute top-1/2 h-px -translate-y-1/2",
           "bg-primary/35",
           "transition-[background-color,opacity,transform]",
           "duration-500",

@@ -9,6 +9,8 @@ import { HomeHero } from "./Hero";
 import { PlatformSection } from "./PlatformSection";
 import type { ActiveGame, HomeProduct } from "./home.types";
 import { KnowledgeNode } from "../flow/KnowledgeNode";
+import { HowItWorks } from "./HowItWorks";
+import { HomeCta } from "./HomeCta";
 
 export function HomeExperience() {
   const [activeGame, setActiveGame] = useState<ActiveGame>(null);
@@ -35,7 +37,15 @@ export function HomeExperience() {
         </KnowledgeNode>
 
         <KnowledgeNode side="left">
+          <HowItWorks />
+        </KnowledgeNode>
+
+        <KnowledgeNode side="right">
           <PlatformSection />
+        </KnowledgeNode>
+
+        <KnowledgeNode side="left">
+          <HomeCta />
         </KnowledgeNode>
       </KnowledgeVoid>
     </div>

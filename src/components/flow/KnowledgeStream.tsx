@@ -187,7 +187,7 @@ export function KnowledgeStream({ containerRef }: KnowledgeStreamProps) {
        * The journey starts when the top of the Knowledge Void
        * reaches 65% of the viewport height.
        */
-      const startLine = window.innerHeight * 0.45;
+      const startLine = window.innerHeight * 0.4;
 
       /*
        * It finishes when the bottom of the Knowledge Void
