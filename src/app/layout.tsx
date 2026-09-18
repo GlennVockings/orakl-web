@@ -1,18 +1,20 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./globals.css";
-import { SiteHeader, Footer, SessionProvider } from "@/components";
-import { getSession } from "@/lib/server/get-session";
 import { Toaster } from "sonner";
+
+import { OraklRouteTransition } from "@/components/transitions/OraklRouteTransition";
+
+import "./globals.css";
 
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
-})
+});
 
 export const metadata: Metadata = {
   title: "Orakl",
-  description: "Prediction games built for competition, connection and bragging rights.",
+  description:
+    "Prediction games built for competition, connection and bragging rights.",
 };
 
 export default function RootLayout({
@@ -20,17 +22,14 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = getSession();
-
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} antialiased`} data-product="platform">
-        <SessionProvider initialSession={session}>
-          <SiteHeader />
+        <OraklRouteTransition>
           <main className="min-h-[calc(100svh-4rem)]">{children}</main>
-          <Footer />
-        </SessionProvider>
-        <Toaster position={"top-center"} richColors />
+        </OraklRouteTransition>
+
+        <Toaster position="top-center" richColors />
       </body>
     </html>
   );
