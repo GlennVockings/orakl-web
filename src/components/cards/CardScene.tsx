@@ -105,7 +105,21 @@ export const CardScene = ({
           </div>
         )}
 
-        <div className="relative z-10">
+        {/*
+          Route travel owns this outer transform.
+          GlassCard keeps complete ownership of its internal
+          tilt / float / entrance transform.
+        */}
+        <div
+          data-orakl-travel-object
+          className="
+            relative
+            z-10
+            w-full
+            [transform-origin:center_center]
+            will-change-transform
+          "
+        >
           <GlassCard className="max-w-none">{children}</GlassCard>
         </div>
       </div>

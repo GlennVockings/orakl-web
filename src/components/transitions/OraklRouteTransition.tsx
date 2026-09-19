@@ -139,15 +139,19 @@ function focusRouteHeading(scene: HTMLElement) {
 }
 
 function getSceneCards(scene: HTMLElement) {
-  return Array.from(scene.querySelectorAll<HTMLElement>("article")).filter(
-    (card) => {
-      const style = window.getComputedStyle(card);
+  return Array.from(
+    scene.querySelectorAll<HTMLElement>("[data-orakl-travel-object]"),
+  ).filter((card) => {
+    const rect = card.getBoundingClientRect();
 
-      return style.backdropFilter !== "none";
-    },
-  );
+    return (
+      rect.bottom > 0 &&
+      rect.top < window.innerHeight &&
+      rect.right > 0 &&
+      rect.left < window.innerWidth
+    );
+  });
 }
-
 function setNavigationBusy(busy: boolean) {
   if (busy) {
     document.documentElement.setAttribute("aria-busy", "true");
@@ -457,16 +461,16 @@ export const OraklRouteTransition = ({
         card.style.transformOrigin = "center center";
 
         animate(card, {
-          opacity: [1, 0],
-          scale: mobile ? [1, 1.16] : [1, 1.24],
+          opacity: [1, 1],
+          scale: mobile ? [1, 2.4] : [1, 3.6],
           translateX: mobile
             ? [0, -72]
             : [0, directionRef.current === 1 ? -110 : 110],
-          translateY: mobile ? [0, -4] : [0, -10],
+          translateY: mobile ? [0, -12] : [0, -28],
           ...(mobile
             ? {}
             : {
-                filter: ["blur(0px)", "blur(10px)"],
+                filter: ["blur(0px)", "blur(2px)"],
               }),
           delay: index * (mobile ? 14 : 22),
           duration: mobile ? MOBILE_EXIT_DURATION : DESKTOP_EXIT_DURATION,
