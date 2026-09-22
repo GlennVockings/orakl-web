@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 
 import { KnowledgeCurrents } from "./KnowledgeCurrents";
-import { MobileOraklNav } from "@/components/navigation/MobileOraklNav";
 
 export type VoidVanishingPoint = {
   x: number;
@@ -30,8 +29,6 @@ export const KnowledgeVoid = ({
         vanishingPoint={vanishingPoint}
         mobileVanishingX={mobileVanishingX}
       />
-
-      <MobileOraklNav />
 
       {children ? <div className="relative z-10">{children}</div> : null}
     </main>

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, CircleUserRound, LogOut, UserRound } from "lucide-react";
+import { ChevronDown, CircleUserRound, LogOut } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -72,7 +72,6 @@ export const OraklNav = ({
         ${className}
       `}
     >
-      {/* Brand */}
       <Link
         href="/"
         className="
@@ -113,7 +112,6 @@ export const OraklNav = ({
 
       <div aria-hidden="true" className="mx-5 h-6 w-px bg-white/[0.1]" />
 
-      {/* Games */}
       <DropdownMenu>
         <DropdownMenuTrigger
           className="
@@ -274,9 +272,10 @@ export const OraklNav = ({
         </DropdownMenuContent>
       </DropdownMenu>
 
+      <div className="flex-1" />
+
       <div aria-hidden="true" className="mx-5 h-6 w-px bg-white/[0.1]" />
 
-      {/* Account */}
       {user ? (
         <UserMenu user={user} pathname={pathname} onSignOut={onSignOut} />
       ) : (
@@ -317,8 +316,7 @@ type UserMenuProps = {
 };
 
 const UserMenu = ({ user, pathname, onSignOut }: UserMenuProps) => {
-  const accountActive =
-    pathname.startsWith("/games/my-games") || pathname.startsWith("/profile");
+  const accountActive = pathname.startsWith("/account");
 
   return (
     <DropdownMenu>
@@ -405,33 +403,23 @@ const UserMenu = ({ user, pathname, onSignOut }: UserMenuProps) => {
           "
         >
           <Link
-            href="/games/my-games"
-            className="flex min-h-11 items-center gap-3 px-3 text-sm text-white/70"
+            href="/account"
+            aria-current={accountActive ? "page" : undefined}
+            className="
+              flex
+              min-h-11
+              items-center
+              gap-3
+              px-3
+              text-sm
+              text-white/70
+            "
           >
             <CircleUserRound
               aria-hidden="true"
               className="size-4 text-white/40"
             />
-            My Games
-          </Link>
-        </DropdownMenuItem>
-
-        <DropdownMenuItem
-          asChild
-          className="
-            cursor-pointer
-            rounded-[14px]
-            p-0
-            focus:bg-white/[0.06]
-            focus:text-white
-          "
-        >
-          <Link
-            href="/profile"
-            className="flex min-h-11 items-center gap-3 px-3 text-sm text-white/70"
-          >
-            <UserRound aria-hidden="true" className="size-4 text-white/40" />
-            Profile
+            Account
           </Link>
         </DropdownMenuItem>
 

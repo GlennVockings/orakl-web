@@ -1,6 +1,6 @@
 import { CardScene } from "@/components/cards/CardScene";
-import { GlassCard } from "@/components/cards/GlassCard";
 import { KnowledgeVoid } from "@/components/KnowledgeVoid/KnowledgeVoid";
+import { OraklNavigation } from "@/components/navigation/OraklNavigation";
 import Link from "next/link";
 
 export default function FauxStakes() {
@@ -12,6 +12,8 @@ export default function FauxStakes() {
       }}
       mobileVanishingX={0.5}
     >
+      <OraklNavigation showDesktop={false} />
+
       {/* Hero */}
       <CardScene className="max-w-[860px]">
         <div className="flex flex-col gap-8 sm:gap-10">

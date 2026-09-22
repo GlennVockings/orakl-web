@@ -1,4 +1,3 @@
-import { GlassCard } from "@/components/cards/GlassCard";
 import { GameCardBanner } from "@/components/GameCardBanner";
 import { KnowledgeVoid } from "@/components/KnowledgeVoid/KnowledgeVoid";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -12,6 +11,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { OraklNavigation } from "@/components/navigation/OraklNavigation";
 
 const games = [
   {
@@ -43,6 +43,8 @@ export default function Home() {
       }}
       mobileVanishingX={0.5}
     >
+      <OraklNavigation showDesktop={false} />
+
       <CardScene contentClassName="max-w-[680px]">
         <div className="flex flex-col gap-8 sm:gap-10">
           <div className="flex flex-col gap-4">
