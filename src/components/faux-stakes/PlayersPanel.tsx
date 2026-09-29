@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, isApiError } from "@/lib/api";
 
 type MemberRole = "HOST" | "ADMIN" | "PLAYER";
 
@@ -59,6 +59,27 @@ function getRoleLabel(role: MemberRole) {
   return "Player";
 }
 
+function loadPlayersErrorMessage(error: unknown): string {
+  if (!isApiError(error)) {
+    return "Unable to load players.";
+  }
+
+  switch (error.kind) {
+    case "authentication":
+      return "Your session has expired. Please sign in again.";
+    case "permission":
+      return "You don't have permission to view this competition.";
+    case "not_found":
+      return "This competition could not be found.";
+    case "network":
+      return "We couldn't reach Orakl. Check your connection and try again.";
+    case "server":
+      return "Orakl couldn't load the players right now. Please try again.";
+    default:
+      return error.message || "Unable to load players.";
+  }
+}
+
 export function PlayersPanel({ competitionId, isHost }: PlayersPanelProps) {
   const [competition, setCompetition] = useState<Competition | null>(null);
   const [members, setMembers] = useState<CompetitionMember[]>([]);
@@ -77,22 +98,27 @@ export function PlayersPanel({ competitionId, isHost }: PlayersPanelProps) {
 
       setError(null);
 
-      const [competitionData, memberData] = await Promise.all([
-        apiFetch<Competition>(`/competitions/${competitionId}`),
-        apiFetch<CompetitionMember[]>(`/competitions/${competitionId}/members`),
-      ]);
+      try {
+        const [competitionData, memberData] = await Promise.all([
+          apiFetch<Competition>(`/competitions/${competitionId}`),
+          apiFetch<CompetitionMember[]>(
+            `/competitions/${competitionId}/members`,
+          ),
+        ]);
 
-      if (!competitionData || !memberData) {
-        setError("Unable to load players.");
+        if (!Array.isArray(memberData)) {
+          setError("Orakl returned an unexpected player list.");
+          return;
+        }
+
+        setCompetition(competitionData);
+        setMembers(memberData);
+      } catch (loadError) {
+        setError(loadPlayersErrorMessage(loadError));
+      } finally {
         setLoading(false);
         setRefreshing(false);
-        return;
       }
-
-      setCompetition(competitionData);
-      setMembers(memberData);
-      setLoading(false);
-      setRefreshing(false);
     },
     [competitionId],
   );
@@ -113,6 +139,7 @@ export function PlayersPanel({ competitionId, isHost }: PlayersPanelProps) {
       await navigator.clipboard.writeText(joinCode);
 
       setCopied(true);
+      setError(null);
 
       window.setTimeout(() => {
         setCopied(false);
@@ -123,12 +150,14 @@ export function PlayersPanel({ competitionId, isHost }: PlayersPanelProps) {
   }
 
   async function shareCompetition() {
-    if (!competition?.joinCode) {
+    const joinCode = competition?.joinCode;
+
+    if (!joinCode) {
       setError("The join code is not available.");
       return;
     }
 
-    const shareText = `Join "${competition.name}" on Orakl with code ${competition.joinCode}.`;
+    const shareText = `Join "${competition.name}" on Orakl with code ${joinCode}.`;
 
     if (navigator.share) {
       try {
@@ -137,6 +166,7 @@ export function PlayersPanel({ competitionId, isHost }: PlayersPanelProps) {
           text: shareText,
         });
 
+        setError(null);
         return;
       } catch (shareError) {
         if (
@@ -152,6 +182,7 @@ export function PlayersPanel({ competitionId, isHost }: PlayersPanelProps) {
       await navigator.clipboard.writeText(shareText);
 
       setCopied(true);
+      setError(null);
 
       window.setTimeout(() => {
         setCopied(false);
@@ -192,7 +223,7 @@ export function PlayersPanel({ competitionId, isHost }: PlayersPanelProps) {
 
   return (
     <div className="space-y-4">
-      {canInvite && competition?.joinCode && (
+      {canInvite && competition?.joinCode ? (
         <div className="rounded-2xl border border-[#F05A28]/20 bg-[#F05A28]/[0.07] p-5">
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#F05A28]/20 bg-[#F05A28]/10">
@@ -249,19 +280,22 @@ export function PlayersPanel({ competitionId, isHost }: PlayersPanelProps) {
             </Button>
           </div>
 
-          {copied && (
+          {copied ? (
             <p className="mt-2 text-xs text-emerald-300">
               Copied to clipboard.
             </p>
-          )}
+          ) : null}
         </div>
-      )}
+      ) : null}
 
-      {error && competition && (
-        <div className="rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-300">
+      {error && competition ? (
+        <div
+          role="alert"
+          className="rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-300"
+        >
           {error}
         </div>
-      )}
+      ) : null}
 
       <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
         <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
@@ -323,9 +357,9 @@ export function PlayersPanel({ competitionId, isHost }: PlayersPanelProps) {
                         {displayName}
                       </p>
 
-                      {member.role === "HOST" && (
+                      {member.role === "HOST" ? (
                         <Crown className="h-3.5 w-3.5 shrink-0 text-[#F05A28]" />
-                      )}
+                      ) : null}
                     </div>
 
                     <p className="mt-0.5 text-xs text-white/30">
@@ -347,11 +381,11 @@ export function PlayersPanel({ competitionId, isHost }: PlayersPanelProps) {
         )}
       </div>
 
-      {!isHost && (
+      {!isHost ? (
         <p className="px-1 text-xs leading-relaxed text-white/30">
           Your membership is already active.
         </p>
-      )}
+      ) : null}
     </div>
   );
 }

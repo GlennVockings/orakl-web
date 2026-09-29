@@ -20,7 +20,7 @@ import { TeamSetup } from "@/components/faux-stakes/TeamSetup";
 import { NodeEntrance } from "@/components/nodes/NodeEntrance";
 import { NodeShell } from "@/components/nodes/NodeShell";
 import { Button } from "@/components/ui/button";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, isApiError } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
 
 type Competition = {
@@ -28,7 +28,7 @@ type Competition = {
   name: string;
   description?: string | null;
   status: string;
-  joinCode: string;
+  joinCode?: string;
   gameType: "FAUX_STAKES" | "PREDICTOR";
 };
 
@@ -44,7 +44,7 @@ type CompetitionState =
       competition: Competition;
       membership: Membership;
     }
-  | { status: "error" };
+  | { status: "error"; message: string };
 
 type DashboardSection = "markets" | "teams" | "leaderboard" | "players";
 
@@ -57,6 +57,27 @@ type SetupStepProps = {
   action: string;
   onClick: () => void;
 };
+
+function competitionErrorMessage(error: unknown): string {
+  if (!isApiError(error)) {
+    return "We couldn't load this competition. Please try again.";
+  }
+
+  switch (error.kind) {
+    case "authentication":
+      return "Your session has expired. Please sign in again.";
+    case "permission":
+      return "Your account does not have access to this competition.";
+    case "not_found":
+      return "This competition could not be found.";
+    case "network":
+      return "We couldn't reach Orakl. Check your connection and try again.";
+    case "server":
+      return "Orakl couldn't load this competition right now. Please try again.";
+    default:
+      return error.message || "We couldn't load this competition.";
+  }
+}
 
 function SetupStep({
   number,
@@ -126,7 +147,6 @@ export default function FauxStakesCompetitionPage() {
   });
 
   const [activeTab, setActiveTab] = useState<PrimaryTab>("markets");
-
   const [setupExpanded, setSetupExpanded] = useState(true);
   const [teamCount, setTeamCount] = useState<number | null>(null);
 
@@ -141,12 +161,11 @@ export default function FauxStakesCompetitionPage() {
         apiFetch<Membership>(`/competitions/${encodedId}/me`),
       ]);
 
-      if (
-        !competition ||
-        !membership ||
-        competition.gameType !== "FAUX_STAKES"
-      ) {
-        setState({ status: "error" });
+      if (competition.gameType !== "FAUX_STAKES") {
+        setState({
+          status: "error",
+          message: "This competition is not a Faux Stakes competition.",
+        });
         return;
       }
 
@@ -155,8 +174,11 @@ export default function FauxStakesCompetitionPage() {
         competition,
         membership,
       });
-    } catch {
-      setState({ status: "error" });
+    } catch (error) {
+      setState({
+        status: "error",
+        message: competitionErrorMessage(error),
+      });
     }
   }, [competitionId]);
 
@@ -196,13 +218,14 @@ export default function FauxStakesCompetitionPage() {
   }
 
   const competition = state.status === "ready" ? state.competition : null;
-
   const membership = state.status === "ready" ? state.membership : null;
 
-  const isHost =
+  const canManage =
     membership?.role === "HOST" ||
     membership?.role === "ADMIN" ||
     membership?.isAdmin === true;
+
+  const canInvite = canManage && Boolean(competition?.joinCode);
 
   return (
     <NodeEntrance label="Faux Stakes">
@@ -238,8 +261,7 @@ export default function FauxStakesCompetitionPage() {
             </h2>
 
             <p className="mt-3 text-sm leading-6 text-white/50">
-              We couldn&apos;t load this competition. Check that your account
-              has access.
+              {state.message}
             </p>
 
             <Button
@@ -257,7 +279,11 @@ export default function FauxStakesCompetitionPage() {
           <div className="space-y-6">
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full border border-white/[0.12] bg-white/[0.035] px-3 py-1 text-xs text-white/55">
-                {isHost ? "Host" : "Player"}
+                {membership.role === "HOST"
+                  ? "Host"
+                  : membership.role === "ADMIN"
+                    ? "Admin"
+                    : "Player"}
               </span>
 
               {teamCount !== null ? (
@@ -266,12 +292,14 @@ export default function FauxStakesCompetitionPage() {
                 </span>
               ) : null}
 
-              <span className="rounded-full border border-[#F05A28]/25 bg-[#F05A28]/[0.08] px-3 py-1 text-xs font-medium text-[#FF9A75]">
-                Code {competition.joinCode}
-              </span>
+              {canInvite && competition.joinCode ? (
+                <span className="rounded-full border border-[#F05A28]/25 bg-[#F05A28]/[0.08] px-3 py-1 text-xs font-medium text-[#FF9A75]">
+                  Code {competition.joinCode}
+                </span>
+              ) : null}
             </div>
 
-            {isHost ? (
+            {canManage ? (
               <section
                 aria-labelledby="setup-heading"
                 className="rounded-2xl border border-[#F05A28]/20 bg-[#F05A28]/[0.035] p-5 sm:p-6"
@@ -285,7 +313,7 @@ export default function FauxStakesCompetitionPage() {
                       />
 
                       <p className="text-xs font-medium uppercase tracking-[0.18em] text-[#FF9A75]">
-                        Host setup
+                        Competition setup
                       </p>
                     </div>
 
@@ -345,7 +373,11 @@ export default function FauxStakesCompetitionPage() {
                     <SetupStep
                       number={3}
                       title="Invite players"
-                      description="Share the competition code while you continue preparing markets."
+                      description={
+                        canInvite
+                          ? "Share the competition code while you continue preparing markets."
+                          : "Open the players panel to manage competition membership."
+                      }
                       action="Players"
                       onClick={() => scrollToSection("players")}
                     />
@@ -412,13 +444,16 @@ export default function FauxStakesCompetitionPage() {
                     eyebrow="Play"
                     title="Markets"
                     description={
-                      isHost
+                      canManage
                         ? "Create markets and control when each one is open for staking."
                         : "Choose your outcomes and decide how many Orakls you're willing to put behind them."
                     }
                   />
 
-                  <MarketSetup competitionId={competition.id} isHost={isHost} />
+                  <MarketSetup
+                    competitionId={competition.id}
+                    isHost={canManage}
+                  />
                 </section>
 
                 <section
@@ -431,7 +466,7 @@ export default function FauxStakesCompetitionPage() {
                     eyebrow="Competition"
                     title="Teams"
                     description={
-                      isHost
+                      canManage
                         ? "Manage the teams available when creating team markets."
                         : "Teams currently available in this competition."
                     }
@@ -439,7 +474,7 @@ export default function FauxStakesCompetitionPage() {
 
                   <TeamSetup
                     competitionId={competition.id}
-                    isHost={isHost}
+                    isHost={canManage}
                     onTeamsChange={(teams) => setTeamCount(teams.length)}
                   />
                 </section>
@@ -458,7 +493,7 @@ export default function FauxStakesCompetitionPage() {
                 <section id="competition-players" className="scroll-mt-24">
                   <PlayersPanel
                     competitionId={competition.id}
-                    isHost={isHost}
+                    isHost={canManage}
                   />
                 </section>
               </aside>

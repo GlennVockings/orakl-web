@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, isApiError } from "@/lib/api";
 
 type LeaderboardRow = {
   userId: string;
@@ -42,6 +42,27 @@ type FauxStakesLeaderboardProps = {
 
 function formatOrakls(value: number) {
   return Math.round(Number(value)).toLocaleString();
+}
+
+function leaderboardErrorMessage(error: unknown): string {
+  if (!isApiError(error)) {
+    return "Unable to load the leaderboard.";
+  }
+
+  switch (error.kind) {
+    case "authentication":
+      return "Your session has expired. Please sign in again.";
+    case "permission":
+      return "You don't have permission to view this leaderboard.";
+    case "not_found":
+      return "This competition could not be found.";
+    case "network":
+      return "We couldn't reach Orakl. Check your connection and try again.";
+    case "server":
+      return "Orakl couldn't load the leaderboard right now. Please try again.";
+    default:
+      return error.message || "Unable to load the leaderboard.";
+  }
 }
 
 function RankMovement({ delta }: { delta: number | null }) {
@@ -113,24 +134,27 @@ export function FauxStakesLeaderboard({
 
       setError(null);
 
-      const [leaderboardData, meData] = await Promise.all([
-        apiFetch<LeaderboardResponse>(
-          `/competitions/${competitionId}/leaderboard`,
-        ),
-        apiFetch<MyState>(`/competitions/${competitionId}/me`),
-      ]);
+      try {
+        const [leaderboardData, meData] = await Promise.all([
+          apiFetch<LeaderboardResponse>(
+            `/competitions/${competitionId}/leaderboard`,
+          ),
+          apiFetch<MyState>(`/competitions/${competitionId}/me`),
+        ]);
 
-      if (!leaderboardData || !meData) {
-        setError("Unable to load the leaderboard.");
+        if (!Array.isArray(leaderboardData.rows)) {
+          setError("Orakl returned an unexpected leaderboard.");
+          return;
+        }
+
+        setLeaderboard(leaderboardData);
+        setMe(meData);
+      } catch (loadError) {
+        setError(leaderboardErrorMessage(loadError));
+      } finally {
         setLoading(false);
         setRefreshing(false);
-        return;
       }
-
-      setLeaderboard(leaderboardData);
-      setMe(meData);
-      setLoading(false);
-      setRefreshing(false);
     },
     [competitionId],
   );
@@ -174,7 +198,7 @@ export function FauxStakesLeaderboard({
 
   return (
     <div className="space-y-4">
-      {currentPlayer && (
+      {currentPlayer ? (
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="rounded-2xl border border-[#F05A28]/20 bg-[#F05A28]/10 p-4">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#F05A28]">
@@ -216,7 +240,7 @@ export function FauxStakesLeaderboard({
             </p>
           </div>
         </div>
-      )}
+      ) : null}
 
       <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
         <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
@@ -286,21 +310,21 @@ export function FauxStakesLeaderboard({
                         {row.displayName || "Player"}
                       </p>
 
-                      {isCurrentUser && (
+                      {isCurrentUser ? (
                         <span className="rounded-full border border-[#F05A28]/20 bg-[#F05A28]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-[#F05A28]">
                           You
                         </span>
-                      )}
+                      ) : null}
                     </div>
 
                     <div className="mt-1 flex items-center gap-2">
                       <RankMovement delta={row.rankDelta} />
 
-                      {row.previousRank !== null && (
+                      {row.previousRank !== null ? (
                         <span className="text-[11px] text-white/25">
                           Previous #{row.previousRank}
                         </span>
-                      )}
+                      ) : null}
                     </div>
                   </div>
 

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Plus, RefreshCw, Users, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, isApiError } from "@/lib/api";
 
 type Team = {
   id: string;
@@ -15,7 +15,7 @@ type Team = {
 type TeamState =
   | { status: "loading" }
   | { status: "ready"; teams: Team[] }
-  | { status: "error" };
+  | { status: "error"; message: string };
 
 type TeamSetupProps = {
   competitionId: string;
@@ -28,11 +28,65 @@ type TeamInput = {
   name: string;
 };
 
+const MAX_TEAM_NAME_LENGTH = 50;
+const MAX_TEAMS = 100;
+
 function createTeamInput(): TeamInput {
   return {
     id: crypto.randomUUID(),
     name: "",
   };
+}
+
+function loadTeamsErrorMessage(error: unknown): string {
+  if (!isApiError(error)) {
+    return "We couldn't load the teams.";
+  }
+
+  switch (error.kind) {
+    case "authentication":
+      return "Your session has expired. Please sign in again.";
+    case "permission":
+      return "You don't have permission to view these teams.";
+    case "not_found":
+      return "This competition could not be found.";
+    case "network":
+      return "We couldn't reach Orakl. Check your connection and try again.";
+    case "server":
+      return "Orakl couldn't load the teams right now. Please try again.";
+    default:
+      return error.message || "We couldn't load the teams.";
+  }
+}
+
+function saveTeamsErrorMessage(error: unknown): string {
+  if (!isApiError(error)) {
+    return "We couldn't save the teams. Please try again.";
+  }
+
+  switch (error.kind) {
+    case "validation":
+      return error.message;
+    case "authentication":
+      return "Your session has expired. Please sign in again.";
+    case "permission":
+      return "You don't have permission to add teams to this competition.";
+    case "not_found":
+      return "This competition could not be found.";
+    case "conflict":
+      return (
+        error.message ||
+        "One or more of these teams already exists in the competition."
+      );
+    case "rate_limit":
+      return "You're making requests too quickly. Please wait a moment and try again.";
+    case "network":
+      return "We couldn't reach Orakl. Check your connection and try again.";
+    case "server":
+      return "Orakl couldn't save the teams right now. Please try again.";
+    default:
+      return error.message || "We couldn't save the teams. Please try again.";
+  }
 }
 
 export function TeamSetup({
@@ -61,14 +115,20 @@ export function TeamSetup({
       const teams = await apiFetch<Team[]>(endpoint);
 
       if (!Array.isArray(teams)) {
-        setState({ status: "error" });
+        setState({
+          status: "error",
+          message: "Orakl returned an unexpected response.",
+        });
         return;
       }
 
       setState({ status: "ready", teams });
       onTeamsChange?.(teams);
-    } catch {
-      setState({ status: "error" });
+    } catch (loadError) {
+      setState({
+        status: "error",
+        message: loadTeamsErrorMessage(loadError),
+      });
     }
   }, [endpoint, onTeamsChange]);
 
@@ -86,6 +146,13 @@ export function TeamSetup({
   };
 
   const addInput = () => {
+    const existingTeamCount = state.status === "ready" ? state.teams.length : 0;
+
+    if (existingTeamCount + inputs.length >= MAX_TEAMS) {
+      setError(`A competition can have at most ${MAX_TEAMS} teams.`);
+      return;
+    }
+
     setInputs((current) => [...current, createTeamInput()]);
 
     setError(null);
@@ -112,6 +179,24 @@ export function TeamSetup({
 
     if (names.length === 0) {
       setError("Enter at least one team name.");
+      return;
+    }
+
+    if (names.some((name) => name.length > MAX_TEAM_NAME_LENGTH)) {
+      setError(
+        `Team names must be ${MAX_TEAM_NAME_LENGTH} characters or fewer.`,
+      );
+      return;
+    }
+
+    const existingTeamCount = state.status === "ready" ? state.teams.length : 0;
+
+    if (existingTeamCount + names.length > MAX_TEAMS) {
+      setError(
+        `A competition can have at most ${MAX_TEAMS} teams. You can add ${
+          MAX_TEAMS - existingTeamCount
+        } more.`,
+      );
       return;
     }
 
@@ -146,7 +231,7 @@ export function TeamSetup({
       });
 
       if (!Array.isArray(teams)) {
-        setError("We couldn't save the teams. Please try again.");
+        setError("Orakl returned an unexpected response.");
         return;
       }
 
@@ -158,14 +243,15 @@ export function TeamSetup({
       setSuccess(
         names.length === 1 ? "Team added." : `${names.length} teams added.`,
       );
-    } catch {
-      setError("We couldn't reach Orakl. Please try again.");
+    } catch (saveError) {
+      setError(saveTeamsErrorMessage(saveError));
     } finally {
       setSaving(false);
     }
   };
 
   const teams = state.status === "ready" ? state.teams : [];
+  const remainingTeamSlots = Math.max(0, MAX_TEAMS - teams.length);
 
   return (
     <section
@@ -222,7 +308,7 @@ export function TeamSetup({
 
       {state.status === "error" ? (
         <div className="mt-6" role="alert">
-          <p className="text-sm text-red-300">We couldn't load the teams.</p>
+          <p className="text-sm text-red-300">{state.message}</p>
 
           <Button
             type="button"
@@ -275,7 +361,7 @@ export function TeamSetup({
         </div>
       ) : null}
 
-      {isHost && state.status === "ready" ? (
+      {isHost && state.status === "ready" && remainingTeamSlots > 0 ? (
         <form
           onSubmit={handleSubmit}
           className="mt-8 space-y-5 border-t border-white/[0.08] pt-6"
@@ -284,8 +370,8 @@ export function TeamSetup({
             <h3 className="text-base font-medium text-white">Add teams</h3>
 
             <p className="mt-2 text-sm leading-6 text-white/45">
-              Add one team or several at once. They'll be available when you
-              create team-based markets.
+              Add one team or several at once. They&apos;ll be available when
+              you create team-based markets.
             </p>
           </div>
 
@@ -303,7 +389,7 @@ export function TeamSetup({
                   onChange={(event) =>
                     updateInput(input.id, event.target.value)
                   }
-                  maxLength={50}
+                  maxLength={MAX_TEAM_NAME_LENGTH}
                   required
                   disabled={saving}
                   placeholder={`Team ${index + 1}`}
@@ -327,7 +413,11 @@ export function TeamSetup({
             type="button"
             variant="ghost"
             onClick={addInput}
-            disabled={saving || inputs.length >= 100}
+            disabled={
+              saving ||
+              inputs.length >= remainingTeamSlots ||
+              teams.length + inputs.length >= MAX_TEAMS
+            }
             className="rounded-full text-[#FF9A75] hover:bg-[#F05A28]/10 hover:text-[#FF9A75]"
           >
             <Plus className="size-4" aria-hidden="true" />
@@ -357,6 +447,12 @@ export function TeamSetup({
             </Button>
           </div>
         </form>
+      ) : null}
+
+      {isHost && state.status === "ready" && remainingTeamSlots === 0 ? (
+        <p className="mt-8 border-t border-white/[0.08] pt-6 text-sm text-white/45">
+          This competition has reached the {MAX_TEAMS}-team limit.
+        </p>
       ) : null}
     </section>
   );

@@ -10,10 +10,15 @@ import {
   Trophy,
   X,
 } from "lucide-react";
-import { apiFetch } from "@/lib/api";
-import { Button } from "@/components/ui/button";
 
-type Team = { id: string; name: string };
+import { Button } from "@/components/ui/button";
+import { apiFetch, isApiError } from "@/lib/api";
+
+type Team = {
+  id: string;
+  name: string;
+};
+
 type MarketStatus = "DRAFT" | "OPEN" | "CLOSED" | "SETTLED";
 
 type Selection = {
@@ -61,6 +66,11 @@ type Props = {
 
 type Mode = "teams" | "custom";
 
+const MAX_MARKET_NAME_LENGTH = 100;
+const MAX_OUTCOME_NAME_LENGTH = 100;
+const MIN_STAKE = 1;
+const MAX_STAKE = 1_000_000;
+
 const selectionName = (selection: {
   label: string | null;
   team: Team | null;
@@ -68,6 +78,58 @@ const selectionName = (selection: {
 
 const statusLabel = (status: MarketStatus) =>
   status === "SETTLED" ? "Resolved" : status[0] + status.slice(1).toLowerCase();
+
+function loadErrorMessage(error: unknown): string {
+  if (!isApiError(error)) {
+    return "Unable to load Faux Stakes.";
+  }
+
+  switch (error.kind) {
+    case "authentication":
+      return "Your session has expired. Please sign in again.";
+    case "permission":
+      return "You don't have permission to view this competition.";
+    case "not_found":
+      return "This competition could not be found.";
+    case "network":
+      return "We couldn't reach Orakl. Check your connection and try again.";
+    case "server":
+      return "Orakl couldn't load Faux Stakes right now. Please try again.";
+    default:
+      return error.message || "Unable to load Faux Stakes.";
+  }
+}
+
+function actionErrorMessage(
+  error: unknown,
+  fallback: string,
+  conflictMessage?: string,
+): string {
+  if (!isApiError(error)) {
+    return fallback;
+  }
+
+  switch (error.kind) {
+    case "validation":
+      return error.message;
+    case "authentication":
+      return "Your session has expired. Please sign in again.";
+    case "permission":
+      return "You don't have permission to perform that action.";
+    case "not_found":
+      return "The competition or market could not be found.";
+    case "conflict":
+      return conflictMessage ?? error.message;
+    case "rate_limit":
+      return "You're making requests too quickly. Please wait a moment and try again.";
+    case "network":
+      return "We couldn't reach Orakl. Check your connection and try again.";
+    case "server":
+      return "Orakl couldn't complete that action right now. Please try again.";
+    default:
+      return error.message || fallback;
+  }
+}
 
 export function MarketSetup({ competitionId, isHost }: Props) {
   const [markets, setMarkets] = useState<Market[]>([]);
@@ -90,17 +152,6 @@ export function MarketSetup({ competitionId, isHost }: Props) {
 
   const [stakes, setStakes] = useState<Record<string, string>>({});
 
-  /*
-   * React state is intentionally not our synchronous interaction lock.
-   *
-   * setBusyId() schedules a render, which means two very fast events can
-   * theoretically both observe the old state before React has updated it.
-   *
-   * A ref changes immediately and therefore closes that small window.
-   *
-   * busyId still exists because state is the right tool for rendering
-   * disabled buttons and loading indicators.
-   */
   const operationLockRef = useRef(false);
 
   const beginOperation = useCallback((id: string) => {
@@ -120,24 +171,35 @@ export function MarketSetup({ competitionId, isHost }: Props) {
   }, []);
 
   const loadData = useCallback(async () => {
-    const [marketData, teamData, betData, me] = await Promise.all([
-      apiFetch<Market[]>(`/competitions/${competitionId}/faux-stakes/markets`),
-      apiFetch<Team[]>(`/competitions/${competitionId}/faux-stakes/teams`),
-      apiFetch<Bet[]>(`/competitions/${competitionId}/faux-stakes/bets`),
-      apiFetch<MyState>(`/competitions/${competitionId}/me`),
-    ]);
+    try {
+      const [marketData, teamData, betData, me] = await Promise.all([
+        apiFetch<Market[]>(
+          `/competitions/${competitionId}/faux-stakes/markets`,
+        ),
+        apiFetch<Team[]>(`/competitions/${competitionId}/faux-stakes/teams`),
+        apiFetch<Bet[]>(`/competitions/${competitionId}/faux-stakes/bets`),
+        apiFetch<MyState>(`/competitions/${competitionId}/me`),
+      ]);
 
-    if (!marketData || !teamData || !betData || !me) {
-      setError("Unable to load Faux Stakes.");
+      if (
+        !Array.isArray(marketData) ||
+        !Array.isArray(teamData) ||
+        !Array.isArray(betData)
+      ) {
+        setError("Orakl returned an unexpected response.");
+        return;
+      }
+
+      setMarkets(marketData);
+      setTeams(teamData);
+      setBets(betData);
+      setBalance(Number(me.currentBalance ?? 0));
+      setError(null);
+    } catch (loadError) {
+      setError(loadErrorMessage(loadError));
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setMarkets(marketData);
-    setTeams(teamData);
-    setBets(betData);
-    setBalance(Number(me.currentBalance ?? 0));
-    setLoading(false);
   }, [competitionId]);
 
   useEffect(() => {
@@ -149,16 +211,68 @@ export function MarketSetup({ competitionId, isHost }: Props) {
     [customOutcomes],
   );
 
+  const customOutcomesAreUnique = useMemo(
+    () =>
+      new Set(validCustom.map((outcome) => outcome.toLocaleLowerCase()))
+        .size === validCustom.length,
+    [validCustom],
+  );
+
+  const customOutcomesWithinLimit = useMemo(
+    () =>
+      validCustom.every((outcome) => outcome.length <= MAX_OUTCOME_NAME_LENGTH),
+    [validCustom],
+  );
+
   const canCreate =
     marketName.trim().length > 0 &&
+    marketName.trim().length <= MAX_MARKET_NAME_LENGTH &&
     (mode === "teams"
       ? selectedTeamIds.length >= 2
       : validCustom.length >= 2 &&
-        new Set(validCustom.map((outcome) => outcome.toLowerCase())).size ===
-          validCustom.length);
+        customOutcomesAreUnique &&
+        customOutcomesWithinLimit);
 
   async function createMarket() {
-    if (!canCreate || !beginOperation("create")) {
+    const trimmedName = marketName.trim();
+
+    if (trimmedName.length === 0) {
+      setError("Enter a market name.");
+      return;
+    }
+
+    if (trimmedName.length > MAX_MARKET_NAME_LENGTH) {
+      setError(
+        `Market names must be ${MAX_MARKET_NAME_LENGTH} characters or fewer.`,
+      );
+      return;
+    }
+
+    if (mode === "teams" && selectedTeamIds.length < 2) {
+      setError("Select at least two teams.");
+      return;
+    }
+
+    if (mode === "custom") {
+      if (validCustom.length < 2) {
+        setError("Enter at least two outcomes.");
+        return;
+      }
+
+      if (!customOutcomesAreUnique) {
+        setError("Each outcome must have a different name.");
+        return;
+      }
+
+      if (!customOutcomesWithinLimit) {
+        setError(
+          `Outcome names must be ${MAX_OUTCOME_NAME_LENGTH} characters or fewer.`,
+        );
+        return;
+      }
+    }
+
+    if (!beginOperation("create")) {
       return;
     }
 
@@ -168,36 +282,36 @@ export function MarketSetup({ competitionId, isHost }: Props) {
       const body =
         mode === "teams"
           ? {
-              name: marketName.trim(),
+              name: trimmedName,
               teamSelections: selectedTeamIds.map((teamId) => ({
                 teamId,
               })),
             }
           : {
-              name: marketName.trim(),
+              name: trimmedName,
               labelSelections: validCustom.map((label) => ({
                 label,
               })),
             };
 
-      const result = await apiFetch(
-        `/competitions/${competitionId}/faux-stakes/markets`,
-        {
-          method: "POST",
-          body: JSON.stringify(body),
-        },
-      );
-
-      if (!result) {
-        setError("Unable to create market.");
-        return;
-      }
+      await apiFetch(`/competitions/${competitionId}/faux-stakes/markets`, {
+        method: "POST",
+        body: JSON.stringify(body),
+      });
 
       setMarketName("");
       setSelectedTeamIds([]);
       setCustomOutcomes(["Yes", "No"]);
 
       await loadData();
+    } catch (createError) {
+      setError(
+        actionErrorMessage(
+          createError,
+          "Unable to create market.",
+          "The market could not be created because the competition changed. Refresh and try again.",
+        ),
+      );
     } finally {
       endOperation();
     }
@@ -211,17 +325,22 @@ export function MarketSetup({ competitionId, isHost }: Props) {
     setError(null);
 
     try {
-      const result = await apiFetch(
+      await apiFetch(
         `/competitions/${competitionId}/faux-stakes/markets/${marketId}/${action}`,
         {
           method: "POST",
         },
       );
 
-      if (!result) {
-        setError(`Unable to ${action} market.`);
-        return;
-      }
+      await loadData();
+    } catch (transitionError) {
+      setError(
+        actionErrorMessage(
+          transitionError,
+          `Unable to ${action} market.`,
+          `The market could not be ${action}ed because its state has already changed. Refresh and try again.`,
+        ),
+      );
 
       await loadData();
     } finally {
@@ -237,7 +356,7 @@ export function MarketSetup({ competitionId, isHost }: Props) {
     setError(null);
 
     try {
-      const result = await apiFetch(
+      await apiFetch(
         `/competitions/${competitionId}/faux-stakes/markets/${marketId}/settle`,
         {
           method: "POST",
@@ -247,13 +366,18 @@ export function MarketSetup({ competitionId, isHost }: Props) {
         },
       );
 
-      if (!result) {
-        setError("Unable to resolve market.");
-        return;
-      }
-
       setResolvingMarketId(null);
       setWinningSelectionId("");
+
+      await loadData();
+    } catch (resolveError) {
+      setError(
+        actionErrorMessage(
+          resolveError,
+          "Unable to resolve market.",
+          "This market has already changed or been resolved. Refresh to see its current state.",
+        ),
+      );
 
       await loadData();
     } finally {
@@ -262,16 +386,22 @@ export function MarketSetup({ competitionId, isHost }: Props) {
   }
 
   async function placeStake(marketId: string, selectionId: string) {
-    /*
-     * Validate before acquiring the operation lock.
-     *
-     * A validation failure never starts an asynchronous operation, so
-     * there is no reason to lock the UI.
-     */
     const amount = Number(stakes[selectionId]);
 
-    if (!Number.isFinite(amount) || amount < 1) {
-      setError("Stake must be at least 1 Orakl.");
+    if (!Number.isFinite(amount) || !Number.isInteger(amount)) {
+      setError("Stake must be a whole number of Orakls.");
+      return;
+    }
+
+    if (amount < MIN_STAKE) {
+      setError(`Stake must be at least ${MIN_STAKE} Orakl.`);
+      return;
+    }
+
+    if (amount > MAX_STAKE) {
+      setError(
+        `A single stake cannot exceed ${MAX_STAKE.toLocaleString()} Orakls.`,
+      );
       return;
     }
 
@@ -280,28 +410,12 @@ export function MarketSetup({ competitionId, isHost }: Props) {
       return;
     }
 
-    /*
-     * This is the important double-click guard.
-     *
-     * The ref changes synchronously, so a second event fired before
-     * React rerenders cannot create another UUID-backed request.
-     */
     if (!beginOperation(selectionId)) {
       return;
     }
 
     setError(null);
 
-    /*
-     * Generate exactly one key for this intended submission.
-     *
-     * The key lives for the duration of this request. If the same
-     * request were submitted twice, the API/database idempotency
-     * protection ensures only one Bet/DEBIT is created.
-     *
-     * A later deliberate stake gets a new UUID, which is correct because
-     * multiple independent stakes are a supported Faux Stakes feature.
-     */
     const idempotencyKey = crypto.randomUUID();
 
     try {
@@ -317,25 +431,22 @@ export function MarketSetup({ competitionId, isHost }: Props) {
         }),
       });
 
-      if (!result) {
-        setError(
-          "Stake was not accepted. The market may have closed or your balance may have changed.",
-        );
-        return;
-      }
-
-      /*
-       * Apply the authoritative balance returned by the API immediately.
-       *
-       * loadData() below then refreshes all related state, including the
-       * player's own stake history.
-       */
-      setBalance(result.currentBalance);
+      setBalance(Number(result.currentBalance));
 
       setStakes((current) => ({
         ...current,
         [selectionId]: "",
       }));
+
+      await loadData();
+    } catch (stakeError) {
+      setError(
+        actionErrorMessage(
+          stakeError,
+          "Stake was not accepted.",
+          "Stake was not accepted. The market may have closed or your balance may have changed.",
+        ),
+      );
 
       await loadData();
     } finally {
@@ -393,36 +504,46 @@ export function MarketSetup({ competitionId, isHost }: Props) {
 
           <input
             value={marketName}
-            onChange={(event) => setMarketName(event.target.value)}
+            onChange={(event) => {
+              setMarketName(event.target.value);
+              setError(null);
+            }}
             placeholder="Who will win?"
-            maxLength={100}
+            maxLength={MAX_MARKET_NAME_LENGTH}
             disabled={!!busyId}
             className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none disabled:cursor-not-allowed disabled:opacity-50"
           />
 
           {mode === "teams" ? (
             <div className="grid gap-2 sm:grid-cols-2">
-              {teams.map((team) => (
-                <button
-                  key={team.id}
-                  type="button"
-                  disabled={!!busyId}
-                  onClick={() =>
-                    setSelectedTeamIds((ids) =>
-                      ids.includes(team.id)
-                        ? ids.filter((id) => id !== team.id)
-                        : [...ids, team.id],
-                    )
-                  }
-                  className={`rounded-xl border px-4 py-3 text-left text-sm disabled:cursor-not-allowed disabled:opacity-50 ${
-                    selectedTeamIds.includes(team.id)
-                      ? "border-[#F05A28]/50 bg-[#F05A28]/10 text-white"
-                      : "border-white/10 text-white/60"
-                  }`}
-                >
-                  {team.name}
-                </button>
-              ))}
+              {teams.length === 0 ? (
+                <p className="sm:col-span-2 text-sm text-white/40">
+                  Add teams before creating a team-based market.
+                </p>
+              ) : (
+                teams.map((team) => (
+                  <button
+                    key={team.id}
+                    type="button"
+                    disabled={!!busyId}
+                    onClick={() => {
+                      setSelectedTeamIds((ids) =>
+                        ids.includes(team.id)
+                          ? ids.filter((id) => id !== team.id)
+                          : [...ids, team.id],
+                      );
+                      setError(null);
+                    }}
+                    className={`rounded-xl border px-4 py-3 text-left text-sm disabled:cursor-not-allowed disabled:opacity-50 ${
+                      selectedTeamIds.includes(team.id)
+                        ? "border-[#F05A28]/50 bg-[#F05A28]/10 text-white"
+                        : "border-white/10 text-white/60"
+                    }`}
+                  >
+                    {team.name}
+                  </button>
+                ))
+              )}
             </div>
           ) : (
             <div className="space-y-2">
@@ -430,14 +551,16 @@ export function MarketSetup({ competitionId, isHost }: Props) {
                 <div key={index} className="flex gap-2">
                   <input
                     value={outcome}
+                    maxLength={MAX_OUTCOME_NAME_LENGTH}
                     disabled={!!busyId}
-                    onChange={(event) =>
+                    onChange={(event) => {
                       setCustomOutcomes((items) =>
                         items.map((item, itemIndex) =>
                           itemIndex === index ? event.target.value : item,
                         ),
-                      )
-                    }
+                      );
+                      setError(null);
+                    }}
                     className="min-w-0 flex-1 rounded-xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none disabled:cursor-not-allowed disabled:opacity-50"
                   />
 
@@ -445,11 +568,12 @@ export function MarketSetup({ competitionId, isHost }: Props) {
                     <button
                       type="button"
                       disabled={!!busyId}
-                      onClick={() =>
+                      onClick={() => {
                         setCustomOutcomes((items) =>
                           items.filter((_, itemIndex) => itemIndex !== index),
-                        )
-                      }
+                        );
+                        setError(null);
+                      }}
                       className="disabled:cursor-not-allowed disabled:opacity-50"
                       aria-label={`Remove outcome ${index + 1}`}
                     >
@@ -462,7 +586,10 @@ export function MarketSetup({ competitionId, isHost }: Props) {
               <Button
                 variant="outline"
                 disabled={!!busyId}
-                onClick={() => setCustomOutcomes((items) => [...items, ""])}
+                onClick={() => {
+                  setCustomOutcomes((items) => [...items, ""]);
+                  setError(null);
+                }}
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Add outcome
@@ -485,7 +612,10 @@ export function MarketSetup({ competitionId, isHost }: Props) {
       )}
 
       {error && (
-        <div className="rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-300">
+        <div
+          role="alert"
+          className="rounded-xl border border-red-400/20 bg-red-400/10 px-4 py-3 text-sm text-red-300"
+        >
           {error}
         </div>
       )}
@@ -550,6 +680,7 @@ export function MarketSetup({ competitionId, isHost }: Props) {
                         onClick={() => {
                           setResolvingMarketId(market.id);
                           setWinningSelectionId("");
+                          setError(null);
                         }}
                       >
                         <Trophy className="mr-2 h-4 w-4" />
@@ -584,16 +715,18 @@ export function MarketSetup({ competitionId, isHost }: Props) {
                       <div className="mt-3 flex gap-2">
                         <input
                           type="number"
-                          min="1"
+                          min={MIN_STAKE}
+                          max={MAX_STAKE}
                           step="1"
                           value={stakes[selection.id] ?? ""}
                           disabled={!!busyId}
-                          onChange={(event) =>
+                          onChange={(event) => {
                             setStakes((current) => ({
                               ...current,
                               [selection.id]: event.target.value,
-                            }))
-                          }
+                            }));
+                            setError(null);
+                          }}
                           placeholder="Orakls"
                           className="min-w-0 flex-1 rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none disabled:cursor-not-allowed disabled:opacity-50"
                         />
@@ -629,7 +762,10 @@ export function MarketSetup({ competitionId, isHost }: Props) {
                         key={selection.id}
                         type="button"
                         disabled={!!busyId}
-                        onClick={() => setWinningSelectionId(selection.id)}
+                        onClick={() => {
+                          setWinningSelectionId(selection.id);
+                          setError(null);
+                        }}
                         className={`flex items-center justify-between rounded-xl border px-4 py-3 text-sm disabled:cursor-not-allowed disabled:opacity-50 ${
                           winningSelectionId === selection.id
                             ? "border-[#F05A28]/50 bg-[#F05A28]/10 text-white"
@@ -664,6 +800,7 @@ export function MarketSetup({ competitionId, isHost }: Props) {
                       onClick={() => {
                         setResolvingMarketId(null);
                         setWinningSelectionId("");
+                        setError(null);
                       }}
                     >
                       Cancel
@@ -686,12 +823,14 @@ export function MarketSetup({ competitionId, isHost }: Props) {
                       >
                         <span className="text-white/70">
                           {selectionName(bet.selection)} · {bet.stake} Orakls @{" "}
-                          {bet.oddsSnapshot.toFixed(2)}
+                          {Number(bet.oddsSnapshot).toFixed(2)}
                         </span>
 
                         <span className="text-white/40">
                           {bet.status === "PENDING"
-                            ? `Potential ${bet.potentialReturn.toFixed(2)}`
+                            ? `Potential ${Number(bet.potentialReturn).toFixed(
+                                2,
+                              )}`
                             : bet.status}
                         </span>
                       </div>

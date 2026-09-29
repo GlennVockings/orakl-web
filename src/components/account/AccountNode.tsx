@@ -14,7 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, isApiError } from "@/lib/api";
 import { authClient } from "@/lib/auth-client";
 
 type GameType = "FAUX_STAKES" | "PREDICTOR";
@@ -23,7 +23,7 @@ type CompetitionSummary = {
   id: string;
   name: string;
   status: string;
-  joinCode: string;
+  joinCode?: string;
   gameType?: GameType;
   lastActivityAt?: string;
   myMembership?: {
@@ -44,7 +44,7 @@ type JoinedCompetition = {
 type CompetitionState =
   | { status: "loading" }
   | { status: "ready"; competitions: CompetitionSummary[] }
-  | { status: "error" };
+  | { status: "error"; message: string };
 
 function competitionPath(
   competitionId: string,
@@ -55,6 +55,75 @@ function competitionPath(
   return gameType === "PREDICTOR"
     ? `/games/predictor/${encodedId}`
     : `/games/faux-stakes/${encodedId}`;
+}
+
+function accountLoadErrorMessage(error: unknown): string {
+  if (!isApiError(error)) {
+    return "We couldn't load your competitions.";
+  }
+
+  switch (error.kind) {
+    case "authentication":
+      return "Your session has expired. Please sign in again.";
+    case "network":
+      return "We couldn't reach Orakl. Check your connection and try again.";
+    case "server":
+      return "Orakl couldn't load your competitions right now. Please try again.";
+    default:
+      return error.message || "We couldn't load your competitions.";
+  }
+}
+
+function createCompetitionErrorMessage(error: unknown): string {
+  if (!isApiError(error)) {
+    return "We couldn't create your competition. Please try again.";
+  }
+
+  switch (error.kind) {
+    case "validation":
+      return error.message;
+    case "authentication":
+      return "Your session has expired. Please sign in again.";
+    case "permission":
+      return "You don't have permission to create this competition.";
+    case "conflict":
+      return error.message;
+    case "rate_limit":
+      return "You're making requests too quickly. Please wait a moment and try again.";
+    case "network":
+      return "We couldn't reach Orakl. Check your connection and try again.";
+    case "server":
+      return "Orakl couldn't create the competition right now. Please try again.";
+    default:
+      return error.message || "We couldn't create your competition.";
+  }
+}
+
+function joinCompetitionErrorMessage(error: unknown): string {
+  if (!isApiError(error)) {
+    return "We couldn't join that competition. Please try again.";
+  }
+
+  switch (error.kind) {
+    case "validation":
+      return error.message;
+    case "authentication":
+      return "Your session has expired. Please sign in again.";
+    case "permission":
+      return "You don't have permission to join that competition.";
+    case "not_found":
+      return "We couldn't find a competition with that invitation code.";
+    case "conflict":
+      return error.message;
+    case "rate_limit":
+      return "Too many join attempts. Please wait a moment before trying again.";
+    case "network":
+      return "We couldn't reach Orakl. Check your connection and try again.";
+    case "server":
+      return "Orakl couldn't process that invitation right now. Please try again.";
+    default:
+      return error.message || "We couldn't join that competition.";
+  }
 }
 
 export function AccountNode() {
@@ -84,13 +153,19 @@ export function AccountNode() {
         await apiFetch<CompetitionSummary[]>("/competitions");
 
       if (!Array.isArray(competitions)) {
-        setState({ status: "error" });
+        setState({
+          status: "error",
+          message: "Orakl returned an unexpected response.",
+        });
         return;
       }
 
       setState({ status: "ready", competitions });
-    } catch {
-      setState({ status: "error" });
+    } catch (error) {
+      setState({
+        status: "error",
+        message: accountLoadErrorMessage(error),
+      });
     }
   }, []);
 
@@ -135,9 +210,9 @@ export function AccountNode() {
         }),
       });
 
-      if (!competition?.id) {
+      if (!competition.id) {
         setCreateError(
-          "We couldn't create your competition. Please try again.",
+          "Orakl returned an unexpected response while creating the competition.",
         );
         return;
       }
@@ -146,8 +221,8 @@ export function AccountNode() {
       setCompetitionName("");
 
       router.push(competitionPath(competition.id, competition.gameType));
-    } catch {
-      setCreateError("We couldn't reach Orakl. Please try again.");
+    } catch (error) {
+      setCreateError(createCompetitionErrorMessage(error));
     } finally {
       setCreating(false);
     }
@@ -171,9 +246,9 @@ export function AccountNode() {
         body: JSON.stringify({ joinCode: code }),
       });
 
-      if (!result?.competition?.id) {
+      if (!result.competition?.id) {
         setJoinError(
-          "We couldn't join that competition. Check the code and try again.",
+          "Orakl returned an unexpected response while joining the competition.",
         );
         return;
       }
@@ -184,8 +259,8 @@ export function AccountNode() {
       router.push(
         competitionPath(result.competition.id, result.competition.gameType),
       );
-    } catch {
-      setJoinError("We couldn't reach Orakl. Please try again.");
+    } catch (error) {
+      setJoinError(joinCompetitionErrorMessage(error));
     } finally {
       setJoining(false);
     }
@@ -295,9 +370,7 @@ export function AccountNode() {
                 role="alert"
                 className="mt-6 border-y border-white/[0.08] py-10"
               >
-                <p className="text-sm text-white/65">
-                  We couldn't load your competitions.
-                </p>
+                <p className="text-sm text-white/65">{state.message}</p>
 
                 <Button
                   type="button"
