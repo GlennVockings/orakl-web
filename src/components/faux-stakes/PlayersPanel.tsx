@@ -12,15 +12,15 @@ import {
   UsersRound,
 } from "lucide-react";
 
-import { apiFetch } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { apiFetch } from "@/lib/api";
 
 type MemberRole = "HOST" | "ADMIN" | "PLAYER";
 
 type Competition = {
   id: string;
   name: string;
-  joinCode: string;
+  joinCode?: string;
 };
 
 type CompetitionMember = {
@@ -102,12 +102,15 @@ export function PlayersPanel({ competitionId, isHost }: PlayersPanelProps) {
   }, [loadData]);
 
   async function copyJoinCode() {
-    if (!competition?.joinCode) {
+    const joinCode = competition?.joinCode;
+
+    if (!joinCode) {
+      setError("The join code is not available.");
       return;
     }
 
     try {
-      await navigator.clipboard.writeText(competition.joinCode);
+      await navigator.clipboard.writeText(joinCode);
 
       setCopied(true);
 
@@ -120,7 +123,8 @@ export function PlayersPanel({ competitionId, isHost }: PlayersPanelProps) {
   }
 
   async function shareCompetition() {
-    if (!competition) {
+    if (!competition?.joinCode) {
+      setError("The join code is not available.");
       return;
     }
 
@@ -184,9 +188,11 @@ export function PlayersPanel({ competitionId, isHost }: PlayersPanelProps) {
     );
   }
 
+  const canInvite = isHost && Boolean(competition?.joinCode);
+
   return (
     <div className="space-y-4">
-      {isHost && competition && (
+      {canInvite && competition?.joinCode && (
         <div className="rounded-2xl border border-[#F05A28]/20 bg-[#F05A28]/[0.07] p-5">
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[#F05A28]/20 bg-[#F05A28]/10">
@@ -343,7 +349,7 @@ export function PlayersPanel({ competitionId, isHost }: PlayersPanelProps) {
 
       {!isHost && (
         <p className="px-1 text-xs leading-relaxed text-white/30">
-          Only the host needs the join code. Your membership is already active.
+          Your membership is already active.
         </p>
       )}
     </div>

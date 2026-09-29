@@ -11,8 +11,8 @@ import {
   Trophy,
 } from "lucide-react";
 
-import { apiFetch } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { apiFetch } from "@/lib/api";
 
 type LeaderboardRow = {
   userId: string;
@@ -22,7 +22,6 @@ type LeaderboardRow = {
   previousRank: number | null;
   rankDelta: number | null;
   details: {
-    currentBalance: number;
     settledBalance: number;
   };
 };
@@ -34,7 +33,7 @@ type LeaderboardResponse = {
 
 type MyState = {
   userId: string;
-  currentBalance?: number;
+  currentBalance: number;
 };
 
 type FauxStakesLeaderboardProps = {
@@ -99,7 +98,7 @@ export function FauxStakesLeaderboard({
   const [leaderboard, setLeaderboard] = useState<LeaderboardResponse | null>(
     null,
   );
-  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [me, setMe] = useState<MyState | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -114,14 +113,14 @@ export function FauxStakesLeaderboard({
 
       setError(null);
 
-      const [leaderboardData, me] = await Promise.all([
+      const [leaderboardData, meData] = await Promise.all([
         apiFetch<LeaderboardResponse>(
           `/competitions/${competitionId}/leaderboard`,
         ),
         apiFetch<MyState>(`/competitions/${competitionId}/me`),
       ]);
 
-      if (!leaderboardData || !me) {
+      if (!leaderboardData || !meData) {
         setError("Unable to load the leaderboard.");
         setLoading(false);
         setRefreshing(false);
@@ -129,7 +128,7 @@ export function FauxStakesLeaderboard({
       }
 
       setLeaderboard(leaderboardData);
-      setCurrentUserId(me.userId);
+      setMe(meData);
       setLoading(false);
       setRefreshing(false);
     },
@@ -148,7 +147,7 @@ export function FauxStakesLeaderboard({
     );
   }
 
-  if (error || !leaderboard) {
+  if (error || !leaderboard || !me) {
     return (
       <div className="rounded-2xl border border-red-400/20 bg-red-400/10 p-5">
         <p className="text-sm text-red-300">
@@ -170,7 +169,7 @@ export function FauxStakesLeaderboard({
   }
 
   const currentPlayer = leaderboard.rows.find(
-    (row) => row.userId === currentUserId,
+    (row) => row.userId === me.userId,
   );
 
   return (
@@ -183,7 +182,7 @@ export function FauxStakesLeaderboard({
             </p>
 
             <p className="mt-2 text-2xl font-semibold text-white">
-              {formatOrakls(currentPlayer.details.currentBalance)}
+              {formatOrakls(me.currentBalance)}
               <span className="ml-2 text-sm font-normal text-white/40">
                 Orakls
               </span>
@@ -258,7 +257,7 @@ export function FauxStakesLeaderboard({
         ) : (
           <div className="divide-y divide-white/5">
             {leaderboard.rows.map((row) => {
-              const isCurrentUser = row.userId === currentUserId;
+              const isCurrentUser = row.userId === me.userId;
 
               return (
                 <div
@@ -320,11 +319,6 @@ export function FauxStakesLeaderboard({
           </div>
         )}
       </div>
-
-      <p className="px-1 text-xs leading-relaxed text-white/30">
-        Open-market stakes reduce your available balance immediately, but
-        leaderboard positions only change when markets are resolved.
-      </p>
     </div>
   );
 }
