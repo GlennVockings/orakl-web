@@ -1,6 +1,9 @@
 "use client";
 
+import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -12,6 +15,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 
 const formSchema = z.object({
   name: z.string().min(3, {
@@ -28,6 +32,9 @@ const formSchema = z.object({
 type SignUpFormValues = z.infer<typeof formSchema>;
 
 export const SignUpForm = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -37,8 +44,36 @@ export const SignUpForm = () => {
     },
   });
 
-  function onSubmit(values: SignUpFormValues) {
-    console.log(values);
+  const {
+    formState: { isSubmitting },
+  } = form;
+
+  async function onSubmit(values: SignUpFormValues) {
+    form.clearErrors("root");
+
+    try {
+      const { error } = await authClient.signUp.email({
+        name: values.name,
+        email: values.email,
+        password: values.password,
+      });
+
+      if (error) {
+        form.setError("root", {
+          message:
+            error.message ?? "Unable to create your account. Please try again.",
+        });
+
+        return;
+      }
+
+      router.push("/account");
+      router.refresh();
+    } catch {
+      form.setError("root", {
+        message: "Unable to connect to Orakl. Please try again.",
+      });
+    }
   }
 
   return (
@@ -82,6 +117,7 @@ export const SignUpForm = () => {
                   aria-invalid={fieldState.invalid}
                   autoComplete="name"
                   placeholder="Your name"
+                  disabled={isSubmitting}
                   className="
                     h-12
                     rounded-2xl
@@ -123,6 +159,7 @@ export const SignUpForm = () => {
                   aria-invalid={fieldState.invalid}
                   autoComplete="email"
                   placeholder="you@example.com"
+                  disabled={isSubmitting}
                   className="
                     h-12
                     rounded-2xl
@@ -157,24 +194,57 @@ export const SignUpForm = () => {
                   Password
                 </FieldLabel>
 
-                <Input
-                  {...field}
-                  id="signup-password"
-                  type="password"
-                  aria-invalid={fieldState.invalid}
-                  autoComplete="new-password"
-                  placeholder="At least 6 characters"
-                  className="
-                    h-12
-                    rounded-2xl
-                    border-white/[0.12]
-                    bg-white/[0.04]
-                    text-white
-                    placeholder:text-white/25
-                    focus-visible:border-white/25
-                    focus-visible:ring-white/10
-                  "
-                />
+                <div className="relative">
+                  <Input
+                    {...field}
+                    id="signup-password"
+                    type={showPassword ? "text" : "password"}
+                    aria-invalid={fieldState.invalid}
+                    autoComplete="new-password"
+                    placeholder="At least 6 characters"
+                    disabled={isSubmitting}
+                    className="
+      h-12
+      rounded-2xl
+      border-white/[0.12]
+      bg-white/[0.04]
+      pr-12
+      text-white
+      placeholder:text-white/25
+      focus-visible:border-white/25
+      focus-visible:ring-white/10
+    "
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((current) => !current)}
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                    aria-pressed={showPassword}
+                    className="
+      absolute
+      right-4
+      top-1/2
+      -translate-y-1/2
+      text-white/35
+      transition-colors
+      hover:text-white/70
+      focus-visible:outline-none
+      focus-visible:text-white
+      disabled:pointer-events-none
+      disabled:opacity-50
+    "
+                    disabled={isSubmitting}
+                  >
+                    {showPassword ? (
+                      <Eye className="size-4" aria-hidden="true" />
+                    ) : (
+                      <EyeOff className="size-4" aria-hidden="true" />
+                    )}
+                  </button>
+                </div>
 
                 {fieldState.invalid && (
                   <FieldError
@@ -187,8 +257,15 @@ export const SignUpForm = () => {
           />
         </FieldGroup>
 
+        {form.formState.errors.root?.message && (
+          <p role="alert" className="mt-5 text-sm leading-6 text-[#F05A28]">
+            {form.formState.errors.root.message}
+          </p>
+        )}
+
         <Button
           type="submit"
+          disabled={isSubmitting}
           className="
             mt-8
             min-h-11
@@ -202,9 +279,11 @@ export const SignUpForm = () => {
             text-white
             transition-colors
             hover:bg-white/[0.14]
+            disabled:cursor-not-allowed
+            disabled:opacity-50
           "
         >
-          Create account
+          {isSubmitting ? "Creating account..." : "Create account"}
         </Button>
       </form>
     </div>

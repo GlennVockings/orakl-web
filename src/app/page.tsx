@@ -1,4 +1,3 @@
-import { GlassCard } from "@/components/cards/GlassCard";
 import { GameCardBanner } from "@/components/GameCardBanner";
 import { KnowledgeVoid } from "@/components/KnowledgeVoid/KnowledgeVoid";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -12,6 +11,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { OraklNavigation } from "@/components/navigation/OraklNavigation";
 
 const games = [
   {
@@ -43,6 +43,8 @@ export default function Home() {
       }}
       mobileVanishingX={0.5}
     >
+      <OraklNavigation showDesktop={false} />
+
       <CardScene contentClassName="max-w-[680px]">
         <div className="flex flex-col gap-8 sm:gap-10">
           <div className="flex flex-col gap-4">
@@ -125,9 +127,9 @@ export default function Home() {
             </h2>
 
             <p className="max-w-[520px] text-base leading-7 text-white/60 sm:text-lg sm:leading-8">
-              Orakls are Orakl's virtual game currency — built for competition,
-              strategy and bragging rights. Each game has its own balance, so
-              every experience stands on its own.
+              Orakls are Orakl&apos;s virtual game currency — built for
+              competition, strategy and bragging rights. Each game has its own
+              balance, so every experience stands on its own.
             </p>
           </div>
         </div>

@@ -1,7 +1,10 @@
 allowBuilds:
-  '@prisma/client': false
-  '@prisma/engines': false
-  '@tailwindcss/oxide': true
+  "@prisma/client": false
+  "@prisma/engines": false
+  "@tailwindcss/oxide": true
   prisma: false
   sharp: true
   unrs-resolver: true
+overrides:
+  "@types/react": "19.2.14"
+  "@types/react-dom": "19.2.3"

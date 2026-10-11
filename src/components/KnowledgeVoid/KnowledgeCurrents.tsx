@@ -206,7 +206,7 @@ export const KnowledgeCurrents = ({
   useEffect(() => {
     if (isMobile) {
       desktopVanishingXRef.current = vanishingPoint.x;
-      setDesktopVanishingX(vanishingPoint.x);
+      queueMicrotask(() => setDesktopVanishingX(vanishingPoint.x));
       return;
     }
 
@@ -318,13 +318,7 @@ export const KnowledgeCurrents = ({
 
         coordinateScale,
       }),
-    [
-      vanishingPointPx.x,
-      vanishingPointPx.y,
-      world.width,
-      world.height,
-      coordinateScale,
-    ],
+    [vanishingPointPx, world, coordinateScale],
   );
 
   const nearCurrents = useMemo(
@@ -342,13 +336,7 @@ export const KnowledgeCurrents = ({
 
         coordinateScale,
       }),
-    [
-      vanishingPointPx.x,
-      vanishingPointPx.y,
-      world.width,
-      world.height,
-      coordinateScale,
-    ],
+    [vanishingPointPx, world, coordinateScale],
   );
 
   const allCurrents = [...farCurrents, ...nearCurrents];

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CircleUserRound, LogOut, Menu, UserRound } from "lucide-react";
+import { CircleUserRound, LogOut, Menu } from "lucide-react";
 
 import type { NavigationUser } from "./OraklNav";
 
@@ -18,19 +18,19 @@ import {
 const games = [
   {
     name: "Faux Stakes",
-    href: "/faux-stakes",
+    href: "/games/faux-stakes",
     colour: "#F05A28",
     description: "Turn any event into a competition.",
   },
   {
     name: "Predictor",
-    href: "/predictor",
+    href: "/games/predictor",
     colour: "#0057FF",
     description: "Call real sport before it happens.",
   },
   {
     name: "Arena",
-    href: "/arena",
+    href: "/games/arena",
     colour: "#8B5CF6",
     description: "Study the field. Pick your champion.",
   },
@@ -64,19 +64,13 @@ export const MobileOraklNav = ({
             flex
             items-center
             justify-between
-
             rounded-[20px]
-
             border
             border-white/[0.14]
-
             bg-black/30
-
             px-4
             py-3
-
             shadow-[0_18px_60px_rgba(0,0,0,0.38)]
-
             backdrop-blur-[14px]
             backdrop-saturate-[1.08]
           "
@@ -100,12 +94,9 @@ export const MobileOraklNav = ({
                 size-8
                 items-center
                 justify-center
-
                 rounded-full
-
                 border
                 border-white/20
-
                 bg-white/[0.05]
               "
             >
@@ -131,27 +122,20 @@ export const MobileOraklNav = ({
               size-10
               items-center
               justify-center
-
               rounded-xl
-
               border
               border-white/[0.12]
-
               bg-white/[0.05]
-
               text-white/80
-
               transition-colors
-
               hover:bg-white/[0.09]
               hover:text-white
-
               focus-visible:outline-none
               focus-visible:ring-2
               focus-visible:ring-white/20
             "
           >
-            <Menu className="size-5" />
+            <Menu aria-hidden="true" className="size-5" />
 
             <span className="sr-only">Open navigation</span>
           </SheetTrigger>
@@ -161,17 +145,12 @@ export const MobileOraklNav = ({
           side="right"
           className="
             w-[min(88vw,380px)]
-
             border-l
             border-white/[0.14]
-
             bg-black/70
-
             px-5
             py-6
-
             text-white
-
             backdrop-blur-[22px]
             backdrop-saturate-[1.1]
           "
@@ -182,7 +161,6 @@ export const MobileOraklNav = ({
                 flex
                 items-center
                 gap-3
-
                 text-white
               "
             >
@@ -193,12 +171,9 @@ export const MobileOraklNav = ({
                   size-8
                   items-center
                   justify-center
-
                   rounded-full
-
                   border
                   border-white/20
-
                   bg-white/[0.05]
                 "
               >
@@ -227,7 +202,6 @@ export const MobileOraklNav = ({
               gap-8
             "
           >
-            {/* Home */}
             <div>
               <SheetClose asChild>
                 <Link
@@ -236,16 +210,11 @@ export const MobileOraklNav = ({
                     flex
                     min-h-12
                     items-center
-
                     rounded-2xl
-
                     px-4
-
                     text-base
                     font-medium
-
                     transition-colors
-
                     ${
                       pathname === "/"
                         ? "bg-white/[0.07] text-white"
@@ -258,12 +227,10 @@ export const MobileOraklNav = ({
               </SheetClose>
             </div>
 
-            {/* Games */}
             <div className="flex flex-col gap-3">
               <p
                 className="
                   px-4
-
                   text-xs
                   font-medium
                   uppercase
@@ -282,27 +249,20 @@ export const MobileOraklNav = ({
                     <SheetClose asChild key={game.name}>
                       <Link
                         href={game.href}
+                        aria-current={active ? "page" : undefined}
                         className={`
                           group
-
                           relative
-
                           flex
                           min-h-16
                           flex-col
                           justify-center
                           gap-1
-
                           overflow-hidden
-
                           rounded-[18px]
-
                           border
-
                           px-4
-
                           transition-colors
-
                           ${
                             active
                               ? "border-white/[0.1] bg-white/[0.06]"
@@ -316,14 +276,11 @@ export const MobileOraklNav = ({
                             absolute
                             inset-y-3
                             left-0
-
                             w-[2px]
-
                             rounded-full
                           "
                           style={{
                             backgroundColor: game.colour,
-
                             opacity: active ? 1 : 0.55,
                           }}
                         />
@@ -334,7 +291,6 @@ export const MobileOraklNav = ({
                             className="size-2 rounded-full"
                             style={{
                               backgroundColor: game.colour,
-
                               boxShadow: `0 0 12px ${game.colour}`,
                             }}
                           />
@@ -366,7 +322,6 @@ export const MobileOraklNav = ({
               </div>
             </div>
 
-            {/* Account */}
             <div
               className="
                 border-t
@@ -389,19 +344,13 @@ export const MobileOraklNav = ({
                       min-h-12
                       items-center
                       justify-center
-
                       rounded-full
-
                       border
                       border-white/[0.14]
-
                       px-5
-
                       text-sm
                       font-medium
-
                       transition-colors
-
                       ${
                         pathname === "/auth"
                           ? "bg-white/[0.1] text-white"
@@ -432,9 +381,10 @@ const SignedInAccount = ({
   pathname,
   onSignOut,
 }: SignedInAccountProps) => {
+  const accountActive = pathname.startsWith("/account");
+
   return (
     <div className="flex flex-col gap-4">
-      {/* Identity */}
       <div
         className="
           flex
@@ -457,11 +407,11 @@ const SignedInAccount = ({
         </div>
       </div>
 
-      {/* Account navigation */}
       <div className="flex flex-col gap-1">
         <SheetClose asChild>
           <Link
-            href="/games/my-games"
+            href="/account"
+            aria-current={accountActive ? "page" : undefined}
             className={`
               flex
               min-h-12
@@ -472,9 +422,8 @@ const SignedInAccount = ({
               text-sm
               font-medium
               transition-colors
-
               ${
-                pathname.startsWith("/games/my-games")
+                accountActive
                   ? "bg-white/[0.07] text-white"
                   : "text-white/60 hover:bg-white/[0.05] hover:text-white"
               }
@@ -484,33 +433,7 @@ const SignedInAccount = ({
               aria-hidden="true"
               className="size-4 text-white/40"
             />
-            My Games
-          </Link>
-        </SheetClose>
-
-        <SheetClose asChild>
-          <Link
-            href="/profile"
-            className={`
-              flex
-              min-h-12
-              items-center
-              gap-3
-              rounded-2xl
-              px-4
-              text-sm
-              font-medium
-              transition-colors
-
-              ${
-                pathname.startsWith("/profile")
-                  ? "bg-white/[0.07] text-white"
-                  : "text-white/60 hover:bg-white/[0.05] hover:text-white"
-              }
-            `}
-          >
-            <UserRound aria-hidden="true" className="size-4 text-white/40" />
-            Profile
+            Account
           </Link>
         </SheetClose>
 

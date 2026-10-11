@@ -1,8 +1,6 @@
 import { CardScene } from "@/components/cards/CardScene";
 import { LoginForm } from "@/components/forms/LoginForm";
-import { SignUpForm } from "@/components/forms/SignUpForm";
 import { KnowledgeVoid } from "@/components/KnowledgeVoid/KnowledgeVoid";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Login() {
   return (
@@ -25,28 +23,13 @@ export default function Login() {
             </h1>
 
             <p className="max-w-[560px] text-base leading-7 text-white/60 sm:text-lg sm:leading-8">
-              Sign in to continue, or create an account to start playing.
+              Sign in to continue. Orakl is currently in private preview, so
+              public registration is temporarily unavailable.
             </p>
           </div>
 
-          <div className="hidden lg:grid lg:gap-6 lg:grid-cols-2">
+          <div className="max-w-xl">
             <LoginForm />
-            <SignUpForm />
-          </div>
-
-          <div className="lg:hidden">
-            <Tabs defaultValue="login">
-              <TabsList>
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
-              </TabsList>
-              <TabsContent value="login">
-                <LoginForm />
-              </TabsContent>
-              <TabsContent value="signup">
-                <SignUpForm />
-              </TabsContent>
-            </Tabs>
           </div>
         </div>
       </CardScene>

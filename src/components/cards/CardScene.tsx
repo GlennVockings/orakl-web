@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 
 import { GlassCard } from "@/components/cards/GlassCard";
-import { OraklNav } from "@/components/navigation/OraklNav";
+import { OraklNavigation } from "../navigation/OraklNavigation";
 
 type CardSceneProps = {
   children: ReactNode;
@@ -101,7 +101,7 @@ export const CardScene = ({
               }
             `}
           >
-            <OraklNav />
+            <OraklNavigation showMobile={false} />
           </div>
         )}
 

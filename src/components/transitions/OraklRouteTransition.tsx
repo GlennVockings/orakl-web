@@ -241,7 +241,7 @@ export const OraklRouteTransition = ({
   }, [router]);
 
   useEffect(() => {
-    setRouteVersion((version) => version + 1);
+    queueMicrotask(() => setRouteVersion((version) => version + 1));
   }, [pathname]);
 
   useEffect(() => {
