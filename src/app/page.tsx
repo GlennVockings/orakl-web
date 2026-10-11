@@ -127,9 +127,9 @@ export default function Home() {
             </h2>
 
             <p className="max-w-[520px] text-base leading-7 text-white/60 sm:text-lg sm:leading-8">
-              Orakls are Orakl's virtual game currency — built for competition,
-              strategy and bragging rights. Each game has its own balance, so
-              every experience stands on its own.
+              Orakls are Orakl&apos;s virtual game currency — built for
+              competition, strategy and bragging rights. Each game has its own
+              balance, so every experience stands on its own.
             </p>
           </div>
         </div>

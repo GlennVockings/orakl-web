@@ -133,7 +133,7 @@ export function TeamSetup({
   }, [endpoint, onTeamsChange]);
 
   useEffect(() => {
-    void loadTeams();
+    void Promise.resolve().then(loadTeams);
   }, [loadTeams]);
 
   const updateInput = (id: string, name: string) => {

@@ -160,7 +160,7 @@ export function FauxStakesLeaderboard({
   );
 
   useEffect(() => {
-    void loadLeaderboard();
+    void Promise.resolve().then(() => loadLeaderboard());
   }, [loadLeaderboard]);
 
   if (loading) {

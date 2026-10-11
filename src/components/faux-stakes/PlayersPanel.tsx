@@ -124,7 +124,7 @@ export function PlayersPanel({ competitionId, isHost }: PlayersPanelProps) {
   );
 
   useEffect(() => {
-    void loadData();
+    void Promise.resolve().then(() => loadData());
   }, [loadData]);
 
   async function copyJoinCode() {

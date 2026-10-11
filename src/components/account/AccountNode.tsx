@@ -180,7 +180,7 @@ export function AccountNode() {
       return;
     }
 
-    void loadCompetitions();
+    void Promise.resolve().then(loadCompetitions);
   }, [session?.user.id, loadCompetitions]);
 
   const handleSignOut = async () => {

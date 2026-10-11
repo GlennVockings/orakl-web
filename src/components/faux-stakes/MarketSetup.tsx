@@ -141,7 +141,7 @@ export function MarketSetup({ competitionId, isHost }: Props) {
   }, [competitionId]);
 
   useEffect(() => {
-    void loadData();
+    void Promise.resolve().then(loadData);
   }, [loadData]);
 
   const validCustom = useMemo(

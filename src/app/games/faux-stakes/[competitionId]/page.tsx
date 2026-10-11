@@ -193,7 +193,7 @@ export default function FauxStakesCompetitionPage() {
       return;
     }
 
-    void loadCompetition();
+    void Promise.resolve().then(loadCompetition);
   }, [session?.user.id, competitionId, loadCompetition]);
 
   function scrollToSection(section: DashboardSection) {
