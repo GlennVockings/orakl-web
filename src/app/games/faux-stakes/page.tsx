@@ -35,17 +35,10 @@ export default function FauxStakes() {
 
           <div className="flex flex-wrap gap-3">
             <Link
-              href="/auth"
-              className="inline-flex min-h-11 items-center rounded-full border border-[#F05A28]/40 bg-[#F05A28]/15 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#F05A28]/25"
+              href="/demo"
+              className="inline-flex min-h-11 items-center rounded-full border border-[#F05A28]/40 bg-[#F05A28]/15 px-5 py-2.5 text-sm font-medium text-white/90 transition-colors hover:bg-[#F05A28]/25"
             >
-              Create a Game
-            </Link>
-
-            <Link
-              href="/auth"
-              className="inline-flex min-h-11 items-center rounded-full border border-white/[0.16] bg-white/[0.08] px-5 py-2.5 text-sm font-medium text-white/90 transition-colors hover:bg-white/[0.12]"
-            >
-              Join a Game
+              Demo
             </Link>
           </div>
         </div>
@@ -314,17 +307,10 @@ export default function FauxStakes() {
 
           <div className="flex flex-wrap justify-center gap-3">
             <Link
-              href="/auth"
-              className="inline-flex min-h-11 items-center rounded-full border border-[#F05A28]/40 bg-[#F05A28]/15 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#F05A28]/25"
+              href="/demo"
+              className="inline-flex min-h-11 items-center rounded-full border border-[#F05A28]/40 bg-[#F05A28]/15 px-5 py-2.5 text-sm font-medium text-white/90 transition-colors hover:bg-[#F05A28]/25"
             >
-              Create a Game
-            </Link>
-
-            <Link
-              href="/auth"
-              className="inline-flex min-h-11 items-center rounded-full border border-white/[0.16] bg-white/[0.08] px-5 py-2.5 text-sm font-medium text-white/90 transition-colors hover:bg-white/[0.12]"
-            >
-              Join a Game
+              Demo
             </Link>
           </div>
         </div>
